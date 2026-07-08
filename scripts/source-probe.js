@@ -54,7 +54,7 @@ const safeNumber = (value) => {
 const compactError = (error) =>
   [error?.code, error?.message || String(error)].filter(Boolean).join(' ');
 
-const requestText = async (url, { timeoutMs = 25000, retries = 2 } = {}) => {
+const requestText = async (url, { timeoutMs = 30000, retries = 3 } = {}) => {
   let lastError = null;
   for (let attempt = 1; attempt <= retries; attempt += 1) {
     const controller = new AbortController();
@@ -355,12 +355,13 @@ const runProbe = async () => {
     }
   };
 
-  await Promise.all([
-    capture('eastmoneySpot', fetchSpotProbe),
-    capture('eastmoneyDailyK', () => fetchKlineProbe('600179', '101')),
-    capture('eastmoneyWeeklyK', () => fetchKlineProbe('600179', '102')),
-    capture('thsHot', fetchThsHotProbe),
-  ]);
+  await capture('eastmoneySpot', fetchSpotProbe);
+  await sleep(1200);
+  await capture('eastmoneyDailyK', () => fetchKlineProbe('600179', '101'));
+  await sleep(1200);
+  await capture('eastmoneyWeeklyK', () => fetchKlineProbe('600179', '102'));
+  await sleep(1200);
+  await capture('thsHot', fetchThsHotProbe);
 
   const hasSpot = providers.eastmoneySpot?.status === 'ready';
   const hasFullSpotCoverage =
