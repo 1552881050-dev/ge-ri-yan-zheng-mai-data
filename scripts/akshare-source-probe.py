@@ -175,14 +175,14 @@ def rows_from_tushare(data):
     return [dict(zip(fields, item)) for item in items]
 
 
-def probe_ths_hot():
+def request_tushare_api(api_name, params, fields):
     if not TUSHARE_TOKEN:
         raise RuntimeError("TUSHARE_TOKEN is not configured in GitHub Secrets.")
     payload = {
-        "api_name": "ths_hot",
+        "api_name": api_name,
         "token": TUSHARE_TOKEN,
-        "params": {"market": "热股", "is_new": "Y"},
-        "fields": "trade_date,data_type,ts_code,ts_name,rank,pct_change,current_price,concept,hot,rank_time",
+        "params": params,
+        "fields": fields,
     }
     body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
     req = request.Request(
@@ -194,8 +194,50 @@ def probe_ths_hot():
     with request.urlopen(req, timeout=35) as response:
         result = json.loads(response.read().decode("utf-8"))
     if result.get("code") != 0:
-        raise RuntimeError(result.get("msg") or "Tushare ths_hot failed.")
-    rows = rows_from_tushare(result.get("data") or {})
+        raise RuntimeError(result.get("msg") or f"Tushare {api_name} failed.")
+    return rows_from_tushare(result.get("data") or {})
+
+
+def probe_tushare_stock_basic():
+    rows = request_tushare_api(
+        "stock_basic",
+        {"exchange": "", "list_status": "L"},
+        "ts_code,symbol,name,area,industry,market,list_date,list_status,exchange",
+    )
+    if not rows:
+        raise RuntimeError("Tushare stock_basic returned empty rows.")
+    main_board = [
+        row
+        for row in rows
+        if MAIN_BOARD_RE.match(as_text(row.get("symbol")).zfill(6))
+        and as_text(row.get("ts_code")).upper().endswith((".SH", ".SZ"))
+    ]
+    ordinary = [row for row in main_board if not has_st_name(row.get("name"))]
+    return {
+        "provider": "tushare.stock_basic",
+        "status": "ready",
+        "count": len(rows),
+        "mainBoardCount": len(main_board),
+        "ordinaryMainBoardCount": len(ordinary),
+        "sampleRows": [
+            {
+                "ts_code": row.get("ts_code"),
+                "symbol": row.get("symbol"),
+                "name": row.get("name"),
+                "industry": row.get("industry"),
+                "list_status": row.get("list_status"),
+            }
+            for row in rows[:5]
+        ],
+    }
+
+
+def probe_ths_hot():
+    rows = request_tushare_api(
+        "ths_hot",
+        {"market": "热股", "is_new": "Y"},
+        "trade_date,data_type,ts_code,ts_name,rank,pct_change,current_price,concept,hot,rank_time",
+    )
     if not rows:
         raise RuntimeError("Tushare ths_hot returned empty rows.")
     return {
@@ -250,11 +292,15 @@ def build_status():
     time.sleep(1)
     capture(providers, "akshareWeeklyK", lambda: probe_akshare_kline("600179", "weekly"))
     time.sleep(1)
+    capture_once(providers, "tushareStockBasic", probe_tushare_stock_basic)
+    time.sleep(1)
     capture_once(providers, "thsHot", probe_ths_hot)
 
     spot = providers.get("akshareSpot") or {}
+    stock_basic = providers.get("tushareStockBasic") or {}
     has_spot = spot.get("status") == "ready"
     has_full_spot = has_spot and int(spot.get("totalRows") or 0) >= 4000
+    has_stock_basic = stock_basic.get("status") == "ready" and int(stock_basic.get("count") or 0) >= 4000
     has_daily = (providers.get("akshareDailyK") or {}).get("status") == "ready"
     has_weekly = (providers.get("akshareWeeklyK") or {}).get("status") == "ready"
     has_ths_hot = (providers.get("thsHot") or {}).get("status") == "ready"
@@ -263,15 +309,15 @@ def build_status():
 
     required = {
         "mainBoardUniverse": {
-            "status": "ready" if has_full_spot else "blocked",
-            "source": "akshare.stock_zh_a_spot_em",
-            "notes": "AKShare spot returned enough rows for A-share universe filtering."
-            if has_full_spot
-            else "AKShare spot did not prove enough rows for full A-share universe.",
+            "status": "ready" if has_full_spot or has_stock_basic else "blocked",
+            "source": "akshare.stock_zh_a_spot_em / tushare.stock_basic",
+            "notes": "A-share universe source is ready."
+            if has_full_spot or has_stock_basic
+            else "Neither AKShare spot nor Tushare stock_basic proved enough rows for full A-share universe.",
         },
         "nonStFilter": {
-            "status": "partial" if has_full_spot else "blocked",
-            "source": "akshare.stock_zh_a_spot_em.name",
+            "status": "partial" if has_full_spot or has_stock_basic else "blocked",
+            "source": "akshare.stock_zh_a_spot_em.name / tushare.stock_basic.name",
             "notes": "ST/*ST/delisting are filtered by public name text only; announcement risk remains separate.",
         },
         "pctChangeAndPrice": {
