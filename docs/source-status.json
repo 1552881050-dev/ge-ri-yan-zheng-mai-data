@@ -1,10 +1,10 @@
 {
   "source": "real",
   "product": "jubaopen-stock-picker",
-  "generatedAt": "2026-07-08T15:26:17.303Z",
+  "generatedAt": "2026-07-08T15:28:37.640Z",
   "readiness": {
     "allRequiredReady": false,
-    "canStartMvpScanner": false,
+    "canStartMvpScanner": true,
     "canClaimFullStrategy": false,
     "mustNotFake": [
       "Do not fake THS popularity rank.",
@@ -15,17 +15,17 @@
   },
   "required": {
     "mainBoardUniverse": {
-      "status": "blocked",
+      "status": "ready",
       "source": "eastmoney-public-spot",
       "notes": "Use code prefixes 600/601/603/605/000/001/002 and name text for public main-board universe filtering."
     },
     "nonStFilter": {
-      "status": "blocked",
+      "status": "partial",
       "source": "eastmoney-public-spot.name",
       "notes": "ST and delisting are detected from public name text only. Full announcement risk is separate."
     },
     "pctChangeAndPrice": {
-      "status": "blocked",
+      "status": "ready",
       "source": "eastmoney-public-spot",
       "notes": "Price < 30 and pctChange 2%-5% can be evaluated from spot quote fields."
     },
@@ -35,9 +35,9 @@
       "notes": "Tushare ths_hot is required for real THS popularity. Do not fake this from volume or amount."
     },
     "peTtmNonLoss": {
-      "status": "blocked",
+      "status": "partial",
       "source": "eastmoney-public-spot",
-      "notes": "No PE candidate field detected from spot probe."
+      "notes": "PE candidate fields detected: f9, f115. Field口径 must be locked before final filtering."
     },
     "hardRiskFlags": {
       "status": "blocked",
@@ -45,68 +45,160 @@
       "notes": "Non-standard audit, investigation, major litigation, major reduction, performance blow-up and other hard risks need a real announcement/financial-report source. Do not default to safe."
     },
     "dailyK": {
-      "status": "blocked",
+      "status": "ready",
       "source": "eastmoney-public-daily-kline",
       "notes": "Daily K supports MA, volume, candle, breakout, MACD and KDJ calculations."
     },
     "weeklyK": {
-      "status": "blocked",
+      "status": "ready",
       "source": "eastmoney-public-weekly-kline",
       "notes": "Weekly K supports weekly moving-average bullish alignment."
     },
     "volumeBreakoutInputs": {
-      "status": "blocked",
+      "status": "ready",
       "source": "eastmoney-public-daily-kline",
       "notes": "Daily high/low/open/close/volume can support previous-high, platform and red-candle checks."
     },
     "macdInputs": {
-      "status": "blocked",
+      "status": "ready",
       "source": "eastmoney-public-daily-kline",
       "notes": "MACD can be computed from close series; provider does not need to supply MACD directly."
     },
     "kdjInputs": {
-      "status": "blocked",
+      "status": "ready",
       "source": "eastmoney-public-daily-kline",
       "notes": "KDJ can be computed from high/low/close series; provider does not need to supply KDJ directly."
     }
   },
   "providers": {
+    "eastmoneyWeeklyK": {
+      "provider": "eastmoney-public-weekly-kline",
+      "status": "ready",
+      "host": "https://push2his.eastmoney.com/api/qt/stock/kline/get",
+      "code": "600179",
+      "name": "安通控股",
+      "klt": "102",
+      "count": 129,
+      "latest": {
+        "date": "2026-07-08",
+        "open": 4.63,
+        "close": 4.52,
+        "high": 4.84,
+        "low": 4.5,
+        "volume": 2166069,
+        "amount": 1010123768,
+        "amplitude": 7.41,
+        "pctChange": -1.53,
+        "change": -0.07,
+        "turnoverRate": 5.61
+      }
+    },
     "thsHot": {
       "provider": "thsHot",
       "status": "failed",
-      "errorCode": "tushare_token_missing",
-      "error": "TUSHARE_TOKEN is not configured in GitHub Secrets."
-    },
-    "eastmoneyWeeklyK": {
-      "provider": "eastmoneyWeeklyK",
-      "status": "failed",
-      "errorCode": "all_hosts_failed",
-      "error": "https://push2his.eastmoney.com/api/qt/stock/kline/get: fetch failed | https://push2.eastmoney.com/api/qt/stock/kline/get: http_error HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>ngin"
-    },
-    "eastmoneyDailyK": {
-      "provider": "eastmoneyDailyK",
-      "status": "failed",
-      "errorCode": "all_hosts_failed",
-      "error": "https://push2his.eastmoney.com/api/qt/stock/kline/get: fetch failed | https://push2.eastmoney.com/api/qt/stock/kline/get: fetch failed"
+      "errorCode": "tushare_api_error",
+      "error": "抱歉，您没有接口(ths_hot)访问权限，权限的具体详情访问：https://tushare.pro/document/1?doc_id=108。"
     },
     "eastmoneySpot": {
-      "provider": "eastmoneySpot",
-      "status": "failed",
-      "errorCode": "all_hosts_failed",
-      "error": "https://push2.eastmoney.com/api/qt/clist/get: fetch failed | https://82.push2.eastmoney.com/api/qt/clist/get: fetch failed | https://33.push2.eastmoney.com/api/qt/clist/get: fetch failed"
+      "provider": "eastmoney-public-spot",
+      "status": "ready",
+      "host": "https://push2.eastmoney.com/api/qt/clist/get",
+      "sampleSize": 100,
+      "mainBoardSampleCount": 58,
+      "ordinaryMainBoardSampleCount": 47,
+      "pricePctSampleCount": 0,
+      "peCandidateFields": [
+        "f9",
+        "f115"
+      ],
+      "sampleRows": [
+        {
+          "code": "300454",
+          "name": "深信服",
+          "price": 106.56,
+          "pctChange": 20,
+          "turnoverRate": 9.11,
+          "peCandidates": {
+            "f9": -178.24,
+            "f115": 79.57,
+            "f162": null
+          }
+        },
+        {
+          "code": "300369",
+          "name": "绿盟科技",
+          "price": 6.48,
+          "pctChange": 20,
+          "turnoverRate": 11.02,
+          "peCandidates": {
+            "f9": -13.38,
+            "f115": -126.37,
+            "f162": null
+          }
+        },
+        {
+          "code": "301321",
+          "name": "翰博高新",
+          "price": 49.81,
+          "pctChange": 20,
+          "turnoverRate": 9.59,
+          "peCandidates": {
+            "f9": 503.49,
+            "f115": -165.28,
+            "f162": null
+          }
+        },
+        {
+          "code": "301202",
+          "name": "朗威股份",
+          "price": 39.19,
+          "pctChange": 19.99,
+          "turnoverRate": 5.6,
+          "peCandidates": {
+            "f9": 75.53,
+            "f115": 83.11,
+            "f162": null
+          }
+        },
+        {
+          "code": "301251",
+          "name": "威尔高",
+          "price": 60.92,
+          "pctChange": 19.99,
+          "turnoverRate": 29.61,
+          "peCandidates": {
+            "f9": 422.32,
+            "f115": 221.79,
+            "f162": null
+          }
+        }
+      ]
+    },
+    "eastmoneyDailyK": {
+      "provider": "eastmoney-public-daily-kline",
+      "status": "ready",
+      "host": "https://push2his.eastmoney.com/api/qt/stock/kline/get",
+      "code": "600179",
+      "name": "安通控股",
+      "klt": "101",
+      "count": 597,
+      "latest": {
+        "date": "2026-07-08",
+        "open": 4.79,
+        "close": 4.52,
+        "high": 4.8,
+        "low": 4.5,
+        "volume": 718227,
+        "amount": 328440605,
+        "amplitude": 6.25,
+        "pctChange": -5.83,
+        "change": -0.28,
+        "turnoverRate": 1.86
+      }
     }
   },
   "blockingIssues": [
-    "mainBoardUniverse: Use code prefixes 600/601/603/605/000/001/002 and name text for public main-board universe filtering.",
-    "nonStFilter: ST and delisting are detected from public name text only. Full announcement risk is separate.",
-    "pctChangeAndPrice: Price < 30 and pctChange 2%-5% can be evaluated from spot quote fields.",
     "thsPopularityTop200: Tushare ths_hot is required for real THS popularity. Do not fake this from volume or amount.",
-    "peTtmNonLoss: No PE candidate field detected from spot probe.",
-    "hardRiskFlags: Non-standard audit, investigation, major litigation, major reduction, performance blow-up and other hard risks need a real announcement/financial-report source. Do not default to safe.",
-    "dailyK: Daily K supports MA, volume, candle, breakout, MACD and KDJ calculations.",
-    "weeklyK: Weekly K supports weekly moving-average bullish alignment.",
-    "volumeBreakoutInputs: Daily high/low/open/close/volume can support previous-high, platform and red-candle checks.",
-    "macdInputs: MACD can be computed from close series; provider does not need to supply MACD directly.",
-    "kdjInputs: KDJ can be computed from high/low/close series; provider does not need to supply KDJ directly."
+    "hardRiskFlags: Non-standard audit, investigation, major litigation, major reduction, performance blow-up and other hard risks need a real announcement/financial-report source. Do not default to safe."
   ]
 }
