@@ -1,32 +1,34 @@
 {
   "source": "real",
-  "provider": "tushare-github-actions",
-  "generatedAt": "2026-07-08T10:17:59.415Z",
-  "scanId": "failed-1783505879414",
-  "tradeDate": null,
-  "latestTradeDate": null,
-  "createdAt": "2026-07-08T10:17:59.414Z",
-  "updatedAt": "2026-07-08T10:17:59.414Z",
-  "expiresAt": null,
-  "cacheState": "failed",
-  "scanType": "failed",
-  "todayScanned": false,
-  "failureReason": "trade_cal unavailable and daily fallback failed: 抱歉，您没有接口(daily)访问权限，权限的具体详情访问：https://tushare.pro/document/1?doc_id=108。",
+  "provider": "public-eastmoney-github-actions",
+  "generatedAt": "2026-07-08T10:26:48.471Z",
+  "scanId": "eastmoney-public-20260708-1783506408438",
+  "tradeDate": "2026-07-08",
+  "latestTradeDate": "2026-07-08",
+  "createdAt": "2026-07-08T10:26:43.854Z",
+  "updatedAt": "2026-07-08T10:26:43.854Z",
+  "expiresAt": "2026-07-09T16:26:48.438Z",
+  "cacheState": "partial",
+  "scanType": "partial",
+  "todayScanned": true,
+  "failureReason": null,
   "nextExpectedScanTime": "15:45 Asia/Shanghai on the next scheduled trading weekday",
   "counts": {
-    "qualifiedOrWatch": 0,
+    "qualifiedOrWatch": 27,
     "red": 0,
-    "verifiable": 0,
+    "verifiable": 27,
     "qualified": 0,
-    "watch": 0,
-    "technicalFail": 0
+    "watch": 27,
+    "technicalFail": 20
   },
   "warnings": [
     "Real market data is for discipline assistance only; no auto order, no broker connection, no return promise.",
-    "Failed scan overwrote the previous JSON; no stale ready data is reused."
+    "Tushare scan failed before public fallback: provider_daily_calendar_fallback_failed trade_cal unavailable and daily fallback failed: 抱歉，您没有接口(daily)访问权限，权限的具体详情访问：https://tushare.pro/document/1?doc_id=108。",
+    "Public Eastmoney fallback spot universe=100; mainBoard=58; ordinaryMainBoard=47; selectedForDailyBars=47.",
+    "Public fallback is a partial candidate scan, not a full-market daily-full-market scan.",
+    "Public Eastmoney fallback daily bars scanned=47; displayItems=47; latestTradeDate=2026-07-08.",
+    "cacheState=partial by design; this must not be displayed as daily-full-market.",
+    "mock-real is not used and no Mock/Manual data is read."
   ],
-  "errors": [
-    "provider_daily_calendar_fallback_failed",
-    "trade_cal unavailable and daily fallback failed: 抱歉，您没有接口(daily)访问权限，权限的具体详情访问：https://tushare.pro/document/1?doc_id=108。"
-  ]
+  "errors": []
 }
