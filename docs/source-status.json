@@ -1,7 +1,7 @@
 {
   "source": "real",
   "product": "jubaopen-stock-picker",
-  "generatedAt": "2026-07-08T15:34:04.630Z",
+  "generatedAt": "2026-07-08T15:39:09.625242Z",
   "readiness": {
     "allRequiredReady": false,
     "canStartMvpScanner": false,
@@ -10,130 +10,103 @@
       "Do not fake THS popularity rank.",
       "Do not fake PE TTM.",
       "Do not default hard-risk fields to safe.",
-      "Do not call public partial coverage full-market verified unless coverage is actually proven."
+      "Do not call partial public coverage full-market verified unless coverage is actually proven."
     ]
   },
   "required": {
     "mainBoardUniverse": {
       "status": "blocked",
-      "source": "eastmoney-public-spot",
-      "notes": "Spot probe did not prove full A-share coverage. Do not call this full-market until pagination returns enough rows."
+      "source": "akshare.stock_zh_a_spot_em",
+      "notes": "AKShare spot did not prove enough rows for full A-share universe."
     },
     "nonStFilter": {
       "status": "blocked",
-      "source": "eastmoney-public-spot.name",
-      "notes": "ST and delisting are detected from public name text only. Full announcement risk is separate."
+      "source": "akshare.stock_zh_a_spot_em.name",
+      "notes": "ST/*ST/delisting are filtered by public name text only; announcement risk remains separate."
     },
     "pctChangeAndPrice": {
       "status": "blocked",
-      "source": "eastmoney-public-spot",
-      "notes": "Price < 30 and pctChange 2%-5% can be evaluated from spot quote fields."
+      "source": "akshare.stock_zh_a_spot_em",
+      "notes": "Price < 30 and pctChange 2%-5% are available from spot fields."
     },
     "thsPopularityTop200": {
       "status": "blocked",
       "source": "tushare.ths_hot",
-      "notes": "Tushare ths_hot is required for real THS popularity. Do not fake this from volume or amount."
+      "notes": "Tushare ths_hot permission is required. Do not fake this field."
     },
     "peTtmNonLoss": {
       "status": "blocked",
-      "source": "eastmoney-public-spot",
-      "notes": "No PE candidate field detected from spot probe."
+      "source": "akshare.stock_zh_a_spot_em",
+      "notes": "No PE field detected."
     },
     "hardRiskFlags": {
       "status": "blocked",
       "source": "missing",
-      "notes": "Non-standard audit, investigation, major litigation, major reduction, performance blow-up and other hard risks need a real announcement/financial-report source. Do not default to safe."
+      "notes": "Non-standard audit, investigation, major litigation, major reduction and performance blow-up need a real announcement/financial-report source. Do not default to safe."
     },
     "dailyK": {
-      "status": "ready",
-      "source": "eastmoney-public-daily-kline",
+      "status": "blocked",
+      "source": "akshare.stock_zh_a_hist.daily",
       "notes": "Daily K supports MA, volume, candle, breakout, MACD and KDJ calculations."
     },
     "weeklyK": {
-      "status": "ready",
-      "source": "eastmoney-public-weekly-kline",
+      "status": "blocked",
+      "source": "akshare.stock_zh_a_hist.weekly",
       "notes": "Weekly K supports weekly moving-average bullish alignment."
     },
     "volumeBreakoutInputs": {
-      "status": "ready",
-      "source": "eastmoney-public-daily-kline",
+      "status": "blocked",
+      "source": "akshare.stock_zh_a_hist.daily",
       "notes": "Daily high/low/open/close/volume can support previous-high, platform and red-candle checks."
     },
     "macdInputs": {
-      "status": "ready",
-      "source": "eastmoney-public-daily-kline",
-      "notes": "MACD can be computed from close series; provider does not need to supply MACD directly."
+      "status": "blocked",
+      "source": "akshare.stock_zh_a_hist.daily",
+      "notes": "MACD can be computed from close series."
     },
     "kdjInputs": {
-      "status": "ready",
-      "source": "eastmoney-public-daily-kline",
-      "notes": "KDJ can be computed from high/low/close series; provider does not need to supply KDJ directly."
+      "status": "blocked",
+      "source": "akshare.stock_zh_a_hist.daily",
+      "notes": "KDJ can be computed from high/low/close series."
     }
   },
   "providers": {
-    "eastmoneySpot": {
-      "provider": "eastmoneySpot",
+    "akshareSpot": {
+      "provider": "akshareSpot",
       "status": "failed",
-      "errorCode": "all_hosts_failed",
-      "error": "https://push2.eastmoney.com/api/qt/clist/get: http_error HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>ngin | https://82.push2.eastmoney.com/api/qt/clist/get: fetch failed | https://33.push2.eastmoney.com/api/qt/clist/get: fetch failed"
+      "errorCode": "provider_error",
+      "error": "('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))"
     },
-    "eastmoneyDailyK": {
-      "provider": "eastmoney-public-daily-kline",
-      "status": "ready",
-      "host": "https://push2his.eastmoney.com/api/qt/stock/kline/get",
-      "code": "600179",
-      "name": "安通控股",
-      "klt": "101",
-      "count": 597,
-      "latest": {
-        "date": "2026-07-08",
-        "open": 4.79,
-        "close": 4.52,
-        "high": 4.8,
-        "low": 4.5,
-        "volume": 718227,
-        "amount": 328440605,
-        "amplitude": 6.25,
-        "pctChange": -5.83,
-        "change": -0.28,
-        "turnoverRate": 1.86
-      }
+    "akshareDailyK": {
+      "provider": "akshareDailyK",
+      "status": "failed",
+      "errorCode": "provider_error",
+      "error": "('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))"
     },
-    "eastmoneyWeeklyK": {
-      "provider": "eastmoney-public-weekly-kline",
-      "status": "ready",
-      "host": "https://push2his.eastmoney.com/api/qt/stock/kline/get",
-      "code": "600179",
-      "name": "安通控股",
-      "klt": "102",
-      "count": 129,
-      "latest": {
-        "date": "2026-07-08",
-        "open": 4.63,
-        "close": 4.52,
-        "high": 4.84,
-        "low": 4.5,
-        "volume": 2166069,
-        "amount": 1010123768,
-        "amplitude": 7.41,
-        "pctChange": -1.53,
-        "change": -0.07,
-        "turnoverRate": 5.61
-      }
+    "akshareWeeklyK": {
+      "provider": "akshareWeeklyK",
+      "status": "failed",
+      "errorCode": "provider_error",
+      "error": "('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))"
     },
     "thsHot": {
       "provider": "thsHot",
       "status": "failed",
-      "errorCode": "tushare_api_error",
+      "errorCode": "provider_error",
       "error": "抱歉，您没有接口(ths_hot)访问权限，权限的具体详情访问：https://tushare.pro/document/1?doc_id=108。"
     }
   },
   "blockingIssues": [
-    "mainBoardUniverse: Spot probe did not prove full A-share coverage. Do not call this full-market until pagination returns enough rows.",
-    "nonStFilter: ST and delisting are detected from public name text only. Full announcement risk is separate.",
-    "pctChangeAndPrice: Price < 30 and pctChange 2%-5% can be evaluated from spot quote fields.",
-    "thsPopularityTop200: Tushare ths_hot is required for real THS popularity. Do not fake this from volume or amount.",
-    "peTtmNonLoss: No PE candidate field detected from spot probe.",
-    "hardRiskFlags: Non-standard audit, investigation, major litigation, major reduction, performance blow-up and other hard risks need a real announcement/financial-report source. Do not default to safe."
+    "mainBoardUniverse: AKShare spot did not prove enough rows for full A-share universe.",
+    "nonStFilter: ST/*ST/delisting are filtered by public name text only; announcement risk remains separate.",
+    "pctChangeAndPrice: Price < 30 and pctChange 2%-5% are available from spot fields.",
+    "thsPopularityTop200: Tushare ths_hot permission is required. Do not fake this field.",
+    "peTtmNonLoss: No PE field detected.",
+    "hardRiskFlags: Non-standard audit, investigation, major litigation, major reduction and performance blow-up need a real announcement/financial-report source. Do not default to safe.",
+    "dailyK: Daily K supports MA, volume, candle, breakout, MACD and KDJ calculations.",
+    "weeklyK: Weekly K supports weekly moving-average bullish alignment.",
+    "volumeBreakoutInputs: Daily high/low/open/close/volume can support previous-high, platform and red-candle checks.",
+    "macdInputs: MACD can be computed from close series.",
+    "kdjInputs: KDJ can be computed from high/low/close series."
   ]
 }
