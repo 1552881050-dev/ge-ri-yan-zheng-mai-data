@@ -1,0 +1,42 @@
+name: Daily Scan
+
+on:
+  schedule:
+    - cron: '45 7 * * 1-5'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  daily-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install
+        run: npm install
+
+      - name: Run daily scan
+        run: npm run daily-scan
+        env:
+          TUSHARE_TOKEN: ${{ secrets.TUSHARE_TOKEN }}
+          TUSHARE_ENDPOINT: ${{ secrets.TUSHARE_ENDPOINT }}
+
+      - name: Commit JSON output
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/latest-candidates.json docs/status.json docs/index.html docs/.nojekyll
+          if git diff --cached --quiet; then
+            echo "No JSON changes to commit."
+          else
+            git commit -m "Update latest real candidates"
+            git push
+          fi

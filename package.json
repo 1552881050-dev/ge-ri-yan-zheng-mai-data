@@ -1,0 +1,7 @@
+{
+  "name": "ge-ri-yan-zheng-mai-data",
+  "version": "1.0.0",
+  "scripts": {
+    "daily-scan": "node scripts/daily-scan.js"
+  }
+}

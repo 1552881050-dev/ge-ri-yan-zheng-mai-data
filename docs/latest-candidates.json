@@ -1,0 +1,58 @@
+{
+  "source": "real",
+  "provider": "tushare-github-actions",
+  "scanId": "failed-1783501879147",
+  "tradeDate": null,
+  "latestTradeDate": null,
+  "createdAt": "2026-07-08T09:11:19.147Z",
+  "updatedAt": "2026-07-08T09:11:19.147Z",
+  "expiresAt": null,
+  "cacheState": "failed",
+  "scanType": "failed",
+  "todayScanned": false,
+  "failureReason": "TUSHARE_TOKEN is not configured in GitHub Secrets; writing failed 0/0/0 JSON.",
+  "nextExpectedScanTime": "15:45 Asia/Shanghai on the next scheduled trading weekday",
+  "counts": {
+    "qualifiedOrWatch": 0,
+    "red": 0,
+    "verifiable": 0,
+    "qualified": 0,
+    "watch": 0,
+    "technicalFail": 0
+  },
+  "items": [],
+  "warnings": [
+    "Real market data is for discipline assistance only; no auto order, no broker connection, no return promise.",
+    "Failed scan overwrote the previous JSON; no stale ready data is reused."
+  ],
+  "missingFields": [
+    {
+      "field": "popularityRank",
+      "reason": "Not implemented in V7.2 static MVP; mark missing and do not default to top 200.",
+      "severity": "warning",
+      "action": "Do not treat missing popularity as confirmed strong."
+    },
+    {
+      "field": "boardStrength",
+      "reason": "Not implemented in V7.2 static MVP; mark missing and do not default to strong.",
+      "severity": "warning",
+      "action": "Do not treat missing board strength as confirmed strong."
+    },
+    {
+      "field": "orderBook",
+      "reason": "Not implemented in V7.2 static MVP; mark missing and do not fake intraday order-book data.",
+      "severity": "blocking-intraday",
+      "action": "Intraday confirmation remains unconfirmed without order-book data."
+    },
+    {
+      "field": "announcementRiskFlags",
+      "reason": "Only stock_basic name/list_status are used for ST/delisting in V7.2 static MVP.",
+      "severity": "warning",
+      "action": "Do not default announcement/financial-report risk to safe."
+    }
+  ],
+  "errors": [
+    "provider_not_configured",
+    "TUSHARE_TOKEN is not configured in GitHub Secrets; writing failed 0/0/0 JSON."
+  ]
+}
