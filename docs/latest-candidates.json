@@ -1,16 +1,16 @@
 {
   "source": "real",
   "provider": "tushare-github-actions",
-  "scanId": "failed-1783505704877",
+  "scanId": "failed-1783505879414",
   "tradeDate": null,
   "latestTradeDate": null,
-  "createdAt": "2026-07-08T10:15:04.877Z",
-  "updatedAt": "2026-07-08T10:15:04.877Z",
+  "createdAt": "2026-07-08T10:17:59.414Z",
+  "updatedAt": "2026-07-08T10:17:59.414Z",
   "expiresAt": null,
   "cacheState": "failed",
   "scanType": "failed",
   "todayScanned": false,
-  "failureReason": "抱歉，您没有接口(trade_cal)访问权限，权限的具体详情访问：https://tushare.pro/document/1?doc_id=108。",
+  "failureReason": "trade_cal unavailable and daily fallback failed: 抱歉，您没有接口(daily)访问权限，权限的具体详情访问：https://tushare.pro/document/1?doc_id=108。",
   "nextExpectedScanTime": "15:45 Asia/Shanghai on the next scheduled trading weekday",
   "counts": {
     "qualifiedOrWatch": 0,
@@ -52,7 +52,7 @@
     }
   ],
   "errors": [
-    "provider_api_error",
-    "抱歉，您没有接口(trade_cal)访问权限，权限的具体详情访问：https://tushare.pro/document/1?doc_id=108。"
+    "provider_daily_calendar_fallback_failed",
+    "trade_cal unavailable and daily fallback failed: 抱歉，您没有接口(daily)访问权限，权限的具体详情访问：https://tushare.pro/document/1?doc_id=108。"
   ]
 }
