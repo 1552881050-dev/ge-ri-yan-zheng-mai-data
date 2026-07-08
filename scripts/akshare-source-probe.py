@@ -222,7 +222,20 @@ def probe_ths_hot():
     }
 
 
-def capture(providers, key, fn):
+def capture(providers, key, fn, attempts=3):
+    last_error = None
+    for attempt in range(1, attempts + 1):
+        try:
+            providers[key] = fn()
+            return
+        except Exception as error:
+            last_error = error
+            if attempt < attempts:
+                time.sleep(2 * attempt)
+    providers[key] = provider_failed(key, last_error)
+
+
+def capture_once(providers, key, fn):
     try:
         providers[key] = fn()
     except Exception as error:
@@ -237,7 +250,7 @@ def build_status():
     time.sleep(1)
     capture(providers, "akshareWeeklyK", lambda: probe_akshare_kline("600179", "weekly"))
     time.sleep(1)
-    capture(providers, "thsHot", probe_ths_hot)
+    capture_once(providers, "thsHot", probe_ths_hot)
 
     spot = providers.get("akshareSpot") or {}
     has_spot = spot.get("status") == "ready"
