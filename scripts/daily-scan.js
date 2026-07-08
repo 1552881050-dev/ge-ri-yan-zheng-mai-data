@@ -2,10 +2,13 @@ const fs = require('fs');
 const path = require('path');
 
 const PROVIDER = 'tushare-github-actions';
+const PUBLIC_PROVIDER = 'public-eastmoney-github-actions';
 const TUSHARE_ENDPOINT = process.env.TUSHARE_ENDPOINT || 'https://api.tushare.pro';
 const TUSHARE_TOKEN = String(process.env.TUSHARE_TOKEN || '').trim();
 const REQUEST_DELAY_MS = Number(process.env.TUSHARE_REQUEST_DELAY_MS || 120);
 const LOOKBACK_OPEN_DAYS = Number(process.env.TUSHARE_LOOKBACK_OPEN_DAYS || 90);
+const PUBLIC_SCAN_MAX_SYMBOLS = Number(process.env.PUBLIC_SCAN_MAX_SYMBOLS || 500);
+const PUBLIC_HISTORY_CONCURRENCY = Number(process.env.PUBLIC_HISTORY_CONCURRENCY || 8);
 const DOCS_DIR = path.resolve(__dirname, '..', 'docs');
 const LATEST_FILE = path.join(DOCS_DIR, 'latest-candidates.json');
 const STATUS_FILE = path.join(DOCS_DIR, 'status.json');
@@ -235,6 +238,225 @@ const fetchDailyBasic = (tradeDate) =>
     { trade_date: tradeDate },
     'ts_code,trade_date,turnover_rate,volume_ratio,total_mv,circ_mv',
   );
+
+const requestPublicJson = async (url, { retries = 3, timeoutMs = 25000 } = {}) => {
+  let lastError = null;
+
+  for (let attempt = 1; attempt <= retries; attempt += 1) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const response = await fetch(url, {
+        headers: {
+          Accept: 'application/json,text/plain,*/*',
+          'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36',
+          Referer: 'https://quote.eastmoney.com/',
+        },
+        signal: controller.signal,
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const text = await response.text();
+      const jsonText = text.trim().replace(/^jQuery\d+_\d+\(/, '').replace(/\);?$/, '');
+      return JSON.parse(jsonText);
+    } catch (error) {
+      lastError = error;
+      if (attempt < retries) {
+        await sleep(800 * attempt);
+      }
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
+  throw lastError;
+};
+
+const secidForCode = (code) => `${code.startsWith('6') ? 1 : 0}.${code}`;
+
+const isMainBoardCode = (code) => /^(600|601|603|605|000|001|002)/.test(String(code || ''));
+
+const hasPublicNameRisk = (name) => {
+  const value = String(name || '').toUpperCase();
+  return value.includes('ST') || value.includes('*ST') || value.includes('\u9000');
+};
+
+const toFiniteOrNull = (value) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+const publicMarket = (code) => (String(code).startsWith('6') ? 'SH' : 'SZ');
+
+const fetchEastmoneySpotRows = async () => {
+  const params = new URLSearchParams({
+    pn: '1',
+    pz: '10000',
+    po: '1',
+    np: '1',
+    ut: 'bd1d9ddb04089700cf9c27f6f7426281',
+    fltt: '2',
+    invt: '2',
+    fid: 'f3',
+    fs: 'm:1+t:2,m:1+t:23,m:0+t:6,m:0+t:80',
+    fields: 'f12,f13,f14,f2,f3,f4,f5,f6,f7,f15,f16,f17,f18,f8',
+  });
+  const payload = await requestPublicJson(`https://push2.eastmoney.com/api/qt/clist/get?${params}`);
+  const rows = payload?.data?.diff;
+  if (!Array.isArray(rows) || rows.length === 0) {
+    throw new ProviderError('public_spot_empty', 'Eastmoney public spot API returned no A-share rows.');
+  }
+  return rows;
+};
+
+const fetchEastmoneyDailyCandles = async (code) => {
+  const params = new URLSearchParams({
+    secid: secidForCode(code),
+    fields1: 'f1,f2,f3,f4,f5,f6',
+    fields2: 'f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61',
+    klt: '101',
+    fqt: '0',
+    beg: formatChinaDateCompact(addDays(new Date(), -520)),
+    end: formatChinaDateCompact(new Date()),
+  });
+  const payload = await requestPublicJson(
+    `https://push2his.eastmoney.com/api/qt/stock/kline/get?${params}`,
+    { retries: 2, timeoutMs: 20000 },
+  );
+  const klines = payload?.data?.klines;
+  if (!Array.isArray(klines)) return [];
+
+  return klines
+    .map((line) => {
+      const [
+        date,
+        open,
+        close,
+        high,
+        low,
+        volume,
+        amount,
+        _amplitude,
+        pctChange,
+        change,
+        turnoverRate,
+      ] = String(line).split(',');
+      return {
+        date,
+        tradeDate: String(date || '').replace(/-/g, ''),
+        open: round(toNumber(open)),
+        high: round(toNumber(high)),
+        low: round(toNumber(low)),
+        close: round(toNumber(close)),
+        volume: Math.round(toNumber(volume) * 100),
+        amount: round(toNumber(amount) / 100000000),
+        pctChange: round(toNumber(pctChange)),
+        change: round(toNumber(change)),
+        turnoverRate: round(toNumber(turnoverRate), 4),
+        sourceType: 'real',
+      };
+    })
+    .filter((item) => item.date && Number.isFinite(item.close))
+    .sort((left, right) => String(left.date).localeCompare(String(right.date)));
+};
+
+const publicSpotToStock = (row) => {
+  const code = String(row.f12 || '').padStart(6, '0');
+  const market = publicMarket(code);
+  const name = String(row.f14 || code);
+
+  return {
+    stock: {
+      ts_code: `${code}.${market}`,
+      symbol: code,
+      name,
+      area: '',
+      industry: '',
+      market,
+      list_status: 'L',
+      exchange: market,
+      pctChange: toFiniteOrNull(row.f3),
+    },
+    dailyBasic: {
+      turnover_rate: toFiniteOrNull(row.f8) ?? 0,
+    },
+    spot: {
+      code,
+      name,
+      market,
+      price: toFiniteOrNull(row.f2),
+      pctChange: toFiniteOrNull(row.f3),
+      amount: toFiniteOrNull(row.f6),
+      turnoverRate: toFiniteOrNull(row.f8),
+      high: toFiniteOrNull(row.f15),
+      low: toFiniteOrNull(row.f16),
+      open: toFiniteOrNull(row.f17),
+      preClose: toFiniteOrNull(row.f18),
+    },
+  };
+};
+
+const selectPublicScanRows = (spotRows, warnings) => {
+  const mainBoardRows = spotRows
+    .map(publicSpotToStock)
+    .filter(({ spot }) => isMainBoardCode(spot.code));
+  const ordinaryRows = mainBoardRows.filter(({ spot }) => !hasPublicNameRisk(spot.name));
+  const pctRangeRows = ordinaryRows.filter(
+    ({ spot }) =>
+      spot.price !== null &&
+      spot.price > 0 &&
+      spot.pctChange !== null &&
+      spot.pctChange > 1 &&
+      spot.pctChange < 6,
+  );
+  const liquidRows = ordinaryRows.filter(
+    ({ spot }) => spot.price !== null && spot.price > 0 && (spot.amount ?? 0) > 30000000,
+  );
+  const byDiscipline = [...pctRangeRows].sort(
+    (left, right) => (right.spot.amount ?? 0) - (left.spot.amount ?? 0),
+  );
+  const byLiquidity = [...liquidRows].sort(
+    (left, right) => (right.spot.amount ?? 0) - (left.spot.amount ?? 0),
+  );
+  const selectedMap = new Map();
+
+  [...byDiscipline, ...byLiquidity].forEach((row) => {
+    if (selectedMap.size < PUBLIC_SCAN_MAX_SYMBOLS) {
+      selectedMap.set(row.spot.code, row);
+    }
+  });
+
+  warnings.push(
+    `Public Eastmoney fallback spot universe=${spotRows.length}; mainBoard=${mainBoardRows.length}; ordinaryMainBoard=${ordinaryRows.length}; selectedForDailyBars=${selectedMap.size}.`,
+  );
+  warnings.push(
+    'Public fallback is a partial candidate scan, not a full-market daily-full-market scan.',
+  );
+
+  return {
+    mainBoardCount: mainBoardRows.length,
+    ordinaryMainBoardCount: ordinaryRows.length,
+    selectedRows: [...selectedMap.values()],
+  };
+};
+
+const mapWithConcurrency = async (items, limit, mapper) => {
+  const results = new Array(items.length);
+  let nextIndex = 0;
+
+  const workers = Array.from({ length: Math.max(1, Math.min(limit, items.length)) }, async () => {
+    while (nextIndex < items.length) {
+      const index = nextIndex;
+      nextIndex += 1;
+      results[index] = await mapper(items[index], index);
+    }
+  });
+
+  await Promise.all(workers);
+  return results;
+};
 
 const splitTsCode = (tsCode) => {
   const [code = '', market = ''] = String(tsCode || '').toUpperCase().split('.');
@@ -584,9 +806,16 @@ const buildMissingFields = () => [
   },
 ];
 
-const createFieldSource = ({ field, sourceType, updatedAt, confidence = 'provider', notes = '' }) => ({
+const createFieldSource = ({
   field,
-  provider: PROVIDER,
+  sourceType,
+  updatedAt,
+  confidence = 'provider',
+  notes = '',
+  provider = PROVIDER,
+}) => ({
+  field,
+  provider,
   sourceType,
   updatedAt,
   confidence,
@@ -604,12 +833,24 @@ const buildRisk = (stock, hasLatestDaily) => {
   };
 };
 
-const buildItem = ({ stock, dailyCandles, dailyBasic, evaluation, latestTradeDate, updatedAt }) => {
+const buildItem = ({
+  stock,
+  dailyCandles,
+  dailyBasic,
+  evaluation,
+  latestTradeDate,
+  updatedAt,
+  provider = PROVIDER,
+}) => {
   const tsCode = String(stock.ts_code || '').toUpperCase();
   const { code, market } = splitTsCode(tsCode);
   const latest = dailyCandles[dailyCandles.length - 1] || null;
   const turnoverRate = round(toNumber(dailyBasic?.turnover_rate), 4);
   const risk = buildRisk(stock, latest?.tradeDate === latestTradeDate);
+  const isPublicProvider = provider === PUBLIC_PROVIDER;
+  const stockBasicSource = isPublicProvider ? 'eastmoney.spot' : 'tushare.stock_basic';
+  const dailySource = isPublicProvider ? 'eastmoney.kline' : 'tushare.daily';
+  const turnoverSource = isPublicProvider ? 'eastmoney.kline.turnover' : 'tushare.daily_basic';
 
   return {
     code,
@@ -655,35 +896,46 @@ const buildItem = ({ stock, dailyCandles, dailyBasic, evaluation, latestTradeDat
     fieldSources: {
       stockBasic: createFieldSource({
         field: 'stockBasic',
-        sourceType: 'tushare.stock_basic',
+        sourceType: stockBasicSource,
         updatedAt,
-        notes: 'Stock list, listing status, name and industry.',
+        provider,
+        notes: isPublicProvider
+          ? 'Stock list and names from Eastmoney public spot API; listing status is partial.'
+          : 'Stock list, listing status, name and industry.',
       }),
       dailyCandles: createFieldSource({
         field: 'dailyCandles',
-        sourceType: 'tushare.daily',
+        sourceType: dailySource,
         updatedAt,
+        provider,
         notes: latestTradeDate,
       }),
       close: createFieldSource({
         field: 'close',
-        sourceType: 'tushare.daily',
+        sourceType: dailySource,
         updatedAt,
+        provider,
         notes: latestTradeDate,
       }),
       turnoverRate: createFieldSource({
         field: 'turnoverRate',
-        sourceType: dailyBasic ? 'tushare.daily_basic' : 'missing',
+        sourceType: dailyBasic ? turnoverSource : 'missing',
         updatedAt,
+        provider,
         confidence: dailyBasic ? 'provider' : 'missing',
-        notes: dailyBasic ? latestTradeDate : 'daily_basic missing; turnoverRate degraded to 0.',
+        notes: dailyBasic
+          ? latestTradeDate
+          : 'turnoverRate missing from provider; degraded to 0.',
       }),
       riskFlags: createFieldSource({
         field: 'riskFlags',
-        sourceType: 'tushare.stock_basic',
+        sourceType: stockBasicSource,
         updatedAt,
+        provider,
         confidence: 'partial',
-        notes: 'ST/delisting risk uses stock_basic name/list_status only.',
+        notes: isPublicProvider
+          ? 'ST/delisting risk uses Eastmoney public name text only; announcement risk remains missing.'
+          : 'ST/delisting risk uses stock_basic name/list_status only.',
       }),
     },
     missingFields: buildMissingFields(),
@@ -704,7 +956,14 @@ const updateCounts = (counts, evaluation) => {
   if (evaluation.verifiable) counts.verifiable += 1;
 };
 
-const classifyAndBuildItem = ({ stock, dailyCandles, dailyBasic, latestTradeDate, updatedAt }) => {
+const classifyAndBuildItem = ({
+  stock,
+  dailyCandles,
+  dailyBasic,
+  latestTradeDate,
+  updatedAt,
+  provider = PROVIDER,
+}) => {
   const latest = dailyCandles[dailyCandles.length - 1] || null;
   const hasLatestDaily = latest?.tradeDate === latestTradeDate;
   const risk = buildRisk(stock, hasLatestDaily);
@@ -728,6 +987,7 @@ const classifyAndBuildItem = ({ stock, dailyCandles, dailyBasic, latestTradeDate
       evaluation,
       latestTradeDate,
       updatedAt,
+      provider,
     }),
   };
 };
@@ -900,6 +1160,128 @@ const runDailyScan = async () => {
   };
 };
 
+const runPublicEastmoneyScan = async (tushareError) => {
+  const createdAt = nowIso();
+  const warnings = [
+    RISK_WARNING,
+    `Tushare scan failed before public fallback: ${tushareError?.code || 'provider_error'} ${
+      tushareError?.message || tushareError || ''
+    }`.trim(),
+  ];
+  const spotRows = await fetchEastmoneySpotRows();
+  const { mainBoardCount, ordinaryMainBoardCount, selectedRows } = selectPublicScanRows(
+    spotRows,
+    warnings,
+  );
+
+  if (selectedRows.length === 0) {
+    throw new ProviderError(
+      'public_no_selected_symbols',
+      'Public Eastmoney fallback found no selected main-board symbols for daily-bar verification.',
+    );
+  }
+
+  const scanned = await mapWithConcurrency(
+    selectedRows,
+    PUBLIC_HISTORY_CONCURRENCY,
+    async (row) => {
+      const candles = await fetchEastmoneyDailyCandles(row.spot.code);
+      return { ...row, dailyCandles: candles };
+    },
+  );
+  const latestTradeDate = scanned
+    .flatMap((row) => row.dailyCandles.map((item) => item.tradeDate).filter(Boolean))
+    .sort()
+    .at(-1);
+
+  if (!latestTradeDate) {
+    throw new ProviderError(
+      'public_no_daily_data',
+      'Public Eastmoney fallback returned no daily candles for selected main-board symbols.',
+    );
+  }
+
+  const counts = createCounts();
+  const buckets = {
+    qualified: [],
+    watch: [],
+    technicalFail: [],
+    red: [],
+  };
+  let scannedDailyCount = 0;
+
+  scanned.forEach((row) => {
+    const latest = row.dailyCandles[row.dailyCandles.length - 1] || null;
+    const dailyBasic = {
+      turnover_rate: latest?.turnoverRate ?? row.dailyBasic.turnover_rate ?? 0,
+    };
+    const { evaluation, item } = classifyAndBuildItem({
+      stock: row.stock,
+      dailyCandles: row.dailyCandles,
+      dailyBasic,
+      latestTradeDate,
+      updatedAt: createdAt,
+      provider: PUBLIC_PROVIDER,
+    });
+    updateCounts(counts, evaluation);
+    buckets[evaluation.category].push(item);
+    scannedDailyCount += 1;
+  });
+
+  const items = selectDisplayItems(buckets);
+  const tradeDate = dashTradeDate(latestTradeDate);
+  const expiresAt = new Date(Date.now() + 30 * 60 * 60 * 1000).toISOString();
+
+  warnings.push(
+    `Public Eastmoney fallback daily bars scanned=${scannedDailyCount}; displayItems=${items.length}; latestTradeDate=${tradeDate}.`,
+  );
+  warnings.push('cacheState=partial by design; this must not be displayed as daily-full-market.');
+  warnings.push('mock-real is not used and no Mock/Manual data is read.');
+
+  return {
+    source: 'real',
+    provider: PUBLIC_PROVIDER,
+    scanId: `eastmoney-public-${latestTradeDate}-${Date.now()}`,
+    tradeDate,
+    latestTradeDate: tradeDate,
+    createdAt,
+    updatedAt: createdAt,
+    expiresAt,
+    cacheState: 'partial',
+    scanType: 'partial',
+    todayScanned: true,
+    failureReason: null,
+    nextExpectedScanTime: '15:45 Asia/Shanghai on the next scheduled trading weekday',
+    counts,
+    items,
+    warnings,
+    missingFields: [
+      ...buildMissingFields(),
+      {
+        field: 'fullMarketDailyBars',
+        reason:
+          'Public fallback verifies a selected candidate subset from full spot quotes; it is not a full-market daily-bar scan.',
+        severity: 'warning',
+        action: 'Display as partial and do not claim daily-full-market coverage.',
+      },
+      {
+        field: 'providerSLA',
+        reason: 'Eastmoney public endpoints are unofficial and may throttle or change without notice.',
+        severity: 'warning',
+        action: 'If unavailable, write failed JSON and keep counts/items empty.',
+      },
+    ],
+    errors: [],
+    scanMeta: {
+      spotUniverse: spotRows.length,
+      mainBoardCount,
+      ordinaryMainBoardCount,
+      selectedForDailyBars: selectedRows.length,
+      scannedDailyCount,
+    },
+  };
+};
+
 const main = async () => {
   try {
     const latest = await runDailyScan();
@@ -910,9 +1292,26 @@ const main = async () => {
       )}`,
     );
   } catch (error) {
-    const failed = createFailedJson(error);
-    writeJsonOutputs(failed);
-    console.error(`daily-scan failed: ${failed.errors.join(' | ')}`);
+    try {
+      const fallback = await runPublicEastmoneyScan(error);
+      writeJsonOutputs(fallback);
+      console.log(
+        `public fallback partial: tradeDate=${fallback.tradeDate}, items=${fallback.items.length}, counts=${JSON.stringify(
+          fallback.counts,
+        )}`,
+      );
+    } catch (fallbackError) {
+      const failed = createFailedJson(
+        new ProviderError(
+          fallbackError?.code || 'provider_error',
+          `Tushare failed: ${error?.message || error}; public fallback failed: ${
+            fallbackError?.message || fallbackError
+          }`,
+        ),
+      );
+      writeJsonOutputs(failed);
+      console.error(`daily-scan failed: ${failed.errors.join(' | ')}`);
+    }
   }
 };
 
