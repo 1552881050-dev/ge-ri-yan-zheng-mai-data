@@ -20,11 +20,19 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
       - name: Install
-        run: npm install
+        run: |
+          npm install
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
       - name: Probe real data sources
-        run: npm run source-probe
+        run: python scripts/akshare-source-probe.py
         env:
           TUSHARE_TOKEN: ${{ secrets.TUSHARE_TOKEN }}
           TUSHARE_ENDPOINT: ${{ secrets.TUSHARE_ENDPOINT }}
