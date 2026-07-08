@@ -1,17 +1,17 @@
 {
   "source": "real",
   "provider": "tushare-github-actions",
-  "generatedAt": "2026-07-08T09:46:15.096Z",
-  "scanId": "failed-1783503975096",
+  "generatedAt": "2026-07-08T10:07:08.803Z",
+  "scanId": "failed-1783505228802",
   "tradeDate": null,
   "latestTradeDate": null,
-  "createdAt": "2026-07-08T09:46:15.096Z",
-  "updatedAt": "2026-07-08T09:46:15.096Z",
+  "createdAt": "2026-07-08T10:07:08.802Z",
+  "updatedAt": "2026-07-08T10:07:08.802Z",
   "expiresAt": null,
   "cacheState": "failed",
   "scanType": "failed",
   "todayScanned": false,
-  "failureReason": "TUSHARE_TOKEN is not configured in GitHub Secrets; writing failed 0/0/0 JSON.",
+  "failureReason": "您的token不对，请确认。",
   "nextExpectedScanTime": "15:45 Asia/Shanghai on the next scheduled trading weekday",
   "counts": {
     "qualifiedOrWatch": 0,
@@ -26,7 +26,7 @@
     "Failed scan overwrote the previous JSON; no stale ready data is reused."
   ],
   "errors": [
-    "provider_not_configured",
-    "TUSHARE_TOKEN is not configured in GitHub Secrets; writing failed 0/0/0 JSON."
+    "provider_api_error",
+    "您的token不对，请确认。"
   ]
 }
