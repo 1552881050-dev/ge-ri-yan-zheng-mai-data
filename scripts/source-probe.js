@@ -6,6 +6,8 @@ const OUTPUT_FILE = path.join(DOCS_DIR, 'source-status.json');
 
 const TUSHARE_ENDPOINT = process.env.TUSHARE_ENDPOINT || 'https://api.tushare.pro';
 const TUSHARE_TOKEN = String(process.env.TUSHARE_TOKEN || '').trim();
+const EASTMONEY_SPOT_PAGE_SIZE = Number(process.env.EASTMONEY_SPOT_PAGE_SIZE || 100);
+const EASTMONEY_SPOT_MAX_PAGES = Number(process.env.EASTMONEY_SPOT_MAX_PAGES || 80);
 
 const EASTMONEY_SPOT_HOSTS = [
   'https://push2.eastmoney.com/api/qt/clist/get',
@@ -138,20 +140,42 @@ const fetchSpotProbe = async () => {
     'f162',
     'f167',
   ].join(',');
-  const { host, payload } = await requestEastmoneyJson(EASTMONEY_SPOT_HOSTS, {
-    pn: 1,
-    pz: 200,
-    po: 1,
-    np: 1,
-    ut: 'bd1d9ddb04089700cf9c27f6f7426281',
-    fltt: 2,
-    invt: 2,
-    fid: 'f3',
-    fs: 'm:1+t:2,m:1+t:23,m:0+t:6,m:0+t:80',
-    fields,
-  });
-  const rows = payload?.data?.diff;
-  if (!Array.isArray(rows) || rows.length === 0) {
+  const rows = [];
+  const seenCodes = new Set();
+  let lastHost = null;
+  let providerTotal = null;
+  let pagesFetched = 0;
+
+  for (let page = 1; page <= EASTMONEY_SPOT_MAX_PAGES; page += 1) {
+    const { host, payload } = await requestEastmoneyJson(EASTMONEY_SPOT_HOSTS, {
+      pn: page,
+      pz: EASTMONEY_SPOT_PAGE_SIZE,
+      po: 1,
+      np: 1,
+      ut: 'bd1d9ddb04089700cf9c27f6f7426281',
+      fltt: 2,
+      invt: 2,
+      fid: 'f3',
+      fs: 'm:1+t:2,m:1+t:23,m:0+t:6,m:0+t:80',
+      fields,
+    });
+    lastHost = host;
+    pagesFetched += 1;
+    providerTotal = safeNumber(payload?.data?.total) ?? providerTotal;
+    const pageRows = payload?.data?.diff;
+    if (!Array.isArray(pageRows) || pageRows.length === 0) break;
+    pageRows.forEach((row) => {
+      const code = String(row.f12 || '');
+      if (!seenCodes.has(code)) {
+        seenCodes.add(code);
+        rows.push(row);
+      }
+    });
+    if (pageRows.length < EASTMONEY_SPOT_PAGE_SIZE) break;
+    if (providerTotal !== null && rows.length >= providerTotal) break;
+  }
+
+  if (rows.length === 0) {
     throw new ProbeError('eastmoney_spot_empty', 'Eastmoney spot returned no rows.');
   }
   const mainBoardRows = rows.filter((row) => isMainBoardCode(row.f12));
@@ -171,8 +195,11 @@ const fetchSpotProbe = async () => {
   return {
     provider: 'eastmoney-public-spot',
     status: 'ready',
-    host,
-    sampleSize: rows.length,
+    host: lastHost,
+    totalRows: rows.length,
+    providerTotal,
+    pagesFetched,
+    pageSize: EASTMONEY_SPOT_PAGE_SIZE,
     mainBoardSampleCount: mainBoardRows.length,
     ordinaryMainBoardSampleCount: ordinaryMainBoardRows.length,
     pricePctSampleCount: pricePctRows.length,
@@ -336,6 +363,8 @@ const runProbe = async () => {
   ]);
 
   const hasSpot = providers.eastmoneySpot?.status === 'ready';
+  const hasFullSpotCoverage =
+    hasSpot && Number(providers.eastmoneySpot.totalRows || 0) >= 4000;
   const hasDaily = providers.eastmoneyDailyK?.status === 'ready';
   const hasWeekly = providers.eastmoneyWeeklyK?.status === 'ready';
   const hasThsHot = providers.thsHot?.status === 'ready';
@@ -344,9 +373,11 @@ const runProbe = async () => {
 
   const required = {
     mainBoardUniverse: {
-      status: hasSpot ? 'ready' : 'blocked',
+      status: hasFullSpotCoverage ? 'ready' : hasSpot ? 'partial' : 'blocked',
       source: 'eastmoney-public-spot',
-      notes: 'Use code prefixes 600/601/603/605/000/001/002 and name text for public main-board universe filtering.',
+      notes: hasFullSpotCoverage
+        ? 'Paginated Eastmoney spot coverage is sufficient for public A-share universe filtering.'
+        : 'Spot probe did not prove full A-share coverage. Do not call this full-market until pagination returns enough rows.',
     },
     nonStFilter: {
       status: hasSpot ? 'partial' : 'blocked',

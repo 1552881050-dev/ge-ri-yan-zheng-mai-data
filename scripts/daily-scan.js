@@ -9,6 +9,8 @@ const REQUEST_DELAY_MS = Number(process.env.TUSHARE_REQUEST_DELAY_MS || 120);
 const LOOKBACK_OPEN_DAYS = Number(process.env.TUSHARE_LOOKBACK_OPEN_DAYS || 90);
 const PUBLIC_SCAN_MAX_SYMBOLS = Number(process.env.PUBLIC_SCAN_MAX_SYMBOLS || 500);
 const PUBLIC_HISTORY_CONCURRENCY = Number(process.env.PUBLIC_HISTORY_CONCURRENCY || 8);
+const EASTMONEY_SPOT_PAGE_SIZE = Number(process.env.EASTMONEY_SPOT_PAGE_SIZE || 100);
+const EASTMONEY_SPOT_MAX_PAGES = Number(process.env.EASTMONEY_SPOT_MAX_PAGES || 80);
 const DOCS_DIR = path.resolve(__dirname, '..', 'docs');
 const LATEST_FILE = path.join(DOCS_DIR, 'latest-candidates.json');
 const STATUS_FILE = path.join(DOCS_DIR, 'status.json');
@@ -291,23 +293,45 @@ const toFiniteOrNull = (value) => {
 const publicMarket = (code) => (String(code).startsWith('6') ? 'SH' : 'SZ');
 
 const fetchEastmoneySpotRows = async () => {
-  const params = new URLSearchParams({
-    pn: '1',
-    pz: '10000',
-    po: '1',
-    np: '1',
-    ut: 'bd1d9ddb04089700cf9c27f6f7426281',
-    fltt: '2',
-    invt: '2',
-    fid: 'f3',
-    fs: 'm:1+t:2,m:1+t:23,m:0+t:6,m:0+t:80',
-    fields: 'f12,f13,f14,f2,f3,f4,f5,f6,f7,f15,f16,f17,f18,f8',
-  });
-  const payload = await requestPublicJson(`https://push2.eastmoney.com/api/qt/clist/get?${params}`);
-  const rows = payload?.data?.diff;
-  if (!Array.isArray(rows) || rows.length === 0) {
+  const rows = [];
+  const seenCodes = new Set();
+  let providerTotal = null;
+
+  for (let page = 1; page <= EASTMONEY_SPOT_MAX_PAGES; page += 1) {
+    const params = new URLSearchParams({
+      pn: String(page),
+      pz: String(EASTMONEY_SPOT_PAGE_SIZE),
+      po: '1',
+      np: '1',
+      ut: 'bd1d9ddb04089700cf9c27f6f7426281',
+      fltt: '2',
+      invt: '2',
+      fid: 'f3',
+      fs: 'm:1+t:2,m:1+t:23,m:0+t:6,m:0+t:80',
+      fields: 'f12,f13,f14,f2,f3,f4,f5,f6,f7,f15,f16,f17,f18,f8',
+    });
+    const payload = await requestPublicJson(
+      `https://push2.eastmoney.com/api/qt/clist/get?${params}`,
+      { retries: 3, timeoutMs: 25000 },
+    );
+    providerTotal = toFiniteOrNull(payload?.data?.total) ?? providerTotal;
+    const pageRows = payload?.data?.diff;
+    if (!Array.isArray(pageRows) || pageRows.length === 0) break;
+    pageRows.forEach((row) => {
+      const code = String(row.f12 || '');
+      if (!seenCodes.has(code)) {
+        seenCodes.add(code);
+        rows.push(row);
+      }
+    });
+    if (pageRows.length < EASTMONEY_SPOT_PAGE_SIZE) break;
+    if (providerTotal !== null && rows.length >= providerTotal) break;
+  }
+
+  if (rows.length === 0) {
     throw new ProviderError('public_spot_empty', 'Eastmoney public spot API returned no A-share rows.');
   }
+  rows.providerTotal = providerTotal;
   return rows;
 };
 
@@ -429,7 +453,7 @@ const selectPublicScanRows = (spotRows, warnings) => {
   });
 
   warnings.push(
-    `Public Eastmoney fallback spot universe=${spotRows.length}; mainBoard=${mainBoardRows.length}; ordinaryMainBoard=${ordinaryRows.length}; selectedForDailyBars=${selectedMap.size}.`,
+    `Public Eastmoney fallback spot universe=${spotRows.length}; providerTotal=${spotRows.providerTotal ?? 'unknown'}; mainBoard=${mainBoardRows.length}; ordinaryMainBoard=${ordinaryRows.length}; selectedForDailyBars=${selectedMap.size}.`,
   );
   warnings.push(
     'Public fallback is a partial candidate scan, not a full-market daily-full-market scan.',
