@@ -1,0 +1,112 @@
+{
+  "source": "real",
+  "product": "jubaopen-stock-picker",
+  "generatedAt": "2026-07-08T15:26:17.303Z",
+  "readiness": {
+    "allRequiredReady": false,
+    "canStartMvpScanner": false,
+    "canClaimFullStrategy": false,
+    "mustNotFake": [
+      "Do not fake THS popularity rank.",
+      "Do not fake PE TTM.",
+      "Do not default hard-risk fields to safe.",
+      "Do not call public partial coverage full-market verified unless coverage is actually proven."
+    ]
+  },
+  "required": {
+    "mainBoardUniverse": {
+      "status": "blocked",
+      "source": "eastmoney-public-spot",
+      "notes": "Use code prefixes 600/601/603/605/000/001/002 and name text for public main-board universe filtering."
+    },
+    "nonStFilter": {
+      "status": "blocked",
+      "source": "eastmoney-public-spot.name",
+      "notes": "ST and delisting are detected from public name text only. Full announcement risk is separate."
+    },
+    "pctChangeAndPrice": {
+      "status": "blocked",
+      "source": "eastmoney-public-spot",
+      "notes": "Price < 30 and pctChange 2%-5% can be evaluated from spot quote fields."
+    },
+    "thsPopularityTop200": {
+      "status": "blocked",
+      "source": "tushare.ths_hot",
+      "notes": "Tushare ths_hot is required for real THS popularity. Do not fake this from volume or amount."
+    },
+    "peTtmNonLoss": {
+      "status": "blocked",
+      "source": "eastmoney-public-spot",
+      "notes": "No PE candidate field detected from spot probe."
+    },
+    "hardRiskFlags": {
+      "status": "blocked",
+      "source": "missing",
+      "notes": "Non-standard audit, investigation, major litigation, major reduction, performance blow-up and other hard risks need a real announcement/financial-report source. Do not default to safe."
+    },
+    "dailyK": {
+      "status": "blocked",
+      "source": "eastmoney-public-daily-kline",
+      "notes": "Daily K supports MA, volume, candle, breakout, MACD and KDJ calculations."
+    },
+    "weeklyK": {
+      "status": "blocked",
+      "source": "eastmoney-public-weekly-kline",
+      "notes": "Weekly K supports weekly moving-average bullish alignment."
+    },
+    "volumeBreakoutInputs": {
+      "status": "blocked",
+      "source": "eastmoney-public-daily-kline",
+      "notes": "Daily high/low/open/close/volume can support previous-high, platform and red-candle checks."
+    },
+    "macdInputs": {
+      "status": "blocked",
+      "source": "eastmoney-public-daily-kline",
+      "notes": "MACD can be computed from close series; provider does not need to supply MACD directly."
+    },
+    "kdjInputs": {
+      "status": "blocked",
+      "source": "eastmoney-public-daily-kline",
+      "notes": "KDJ can be computed from high/low/close series; provider does not need to supply KDJ directly."
+    }
+  },
+  "providers": {
+    "thsHot": {
+      "provider": "thsHot",
+      "status": "failed",
+      "errorCode": "tushare_token_missing",
+      "error": "TUSHARE_TOKEN is not configured in GitHub Secrets."
+    },
+    "eastmoneyWeeklyK": {
+      "provider": "eastmoneyWeeklyK",
+      "status": "failed",
+      "errorCode": "all_hosts_failed",
+      "error": "https://push2his.eastmoney.com/api/qt/stock/kline/get: fetch failed | https://push2.eastmoney.com/api/qt/stock/kline/get: http_error HTTP 502: <html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>ngin"
+    },
+    "eastmoneyDailyK": {
+      "provider": "eastmoneyDailyK",
+      "status": "failed",
+      "errorCode": "all_hosts_failed",
+      "error": "https://push2his.eastmoney.com/api/qt/stock/kline/get: fetch failed | https://push2.eastmoney.com/api/qt/stock/kline/get: fetch failed"
+    },
+    "eastmoneySpot": {
+      "provider": "eastmoneySpot",
+      "status": "failed",
+      "errorCode": "all_hosts_failed",
+      "error": "https://push2.eastmoney.com/api/qt/clist/get: fetch failed | https://82.push2.eastmoney.com/api/qt/clist/get: fetch failed | https://33.push2.eastmoney.com/api/qt/clist/get: fetch failed"
+    }
+  },
+  "blockingIssues": [
+    "mainBoardUniverse: Use code prefixes 600/601/603/605/000/001/002 and name text for public main-board universe filtering.",
+    "nonStFilter: ST and delisting are detected from public name text only. Full announcement risk is separate.",
+    "pctChangeAndPrice: Price < 30 and pctChange 2%-5% can be evaluated from spot quote fields.",
+    "thsPopularityTop200: Tushare ths_hot is required for real THS popularity. Do not fake this from volume or amount.",
+    "peTtmNonLoss: No PE candidate field detected from spot probe.",
+    "hardRiskFlags: Non-standard audit, investigation, major litigation, major reduction, performance blow-up and other hard risks need a real announcement/financial-report source. Do not default to safe.",
+    "dailyK: Daily K supports MA, volume, candle, breakout, MACD and KDJ calculations.",
+    "weeklyK: Weekly K supports weekly moving-average bullish alignment.",
+    "volumeBreakoutInputs: Daily high/low/open/close/volume can support previous-high, platform and red-candle checks.",
+    "macdInputs: MACD can be computed from close series; provider does not need to supply MACD directly.",
+    "kdjInputs: KDJ can be computed from high/low/close series; provider does not need to supply KDJ directly."
+  ]
+}
