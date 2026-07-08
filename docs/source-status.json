@@ -1,7 +1,7 @@
 {
   "source": "real",
   "product": "jubaopen-stock-picker",
-  "generatedAt": "2026-07-08T15:42:42.312418Z",
+  "generatedAt": "2026-07-08T15:46:07.484874Z",
   "readiness": {
     "allRequiredReady": false,
     "canStartMvpScanner": false,
@@ -16,12 +16,12 @@
   "required": {
     "mainBoardUniverse": {
       "status": "blocked",
-      "source": "akshare.stock_zh_a_spot_em",
-      "notes": "AKShare spot did not prove enough rows for full A-share universe."
+      "source": "akshare.stock_zh_a_spot_em / tushare.stock_basic",
+      "notes": "Neither AKShare spot nor Tushare stock_basic proved enough rows for full A-share universe."
     },
     "nonStFilter": {
       "status": "blocked",
-      "source": "akshare.stock_zh_a_spot_em.name",
+      "source": "akshare.stock_zh_a_spot_em.name / tushare.stock_basic.name",
       "notes": "ST/*ST/delisting are filtered by public name text only; announcement risk remains separate."
     },
     "pctChangeAndPrice": {
@@ -50,7 +50,7 @@
       "notes": "Daily K supports MA, volume, candle, breakout, MACD and KDJ calculations."
     },
     "weeklyK": {
-      "status": "ready",
+      "status": "blocked",
       "source": "akshare.stock_zh_a_hist.weekly",
       "notes": "Weekly K supports weekly moving-average bullish alignment."
     },
@@ -84,37 +84,16 @@
       "error": "('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))"
     },
     "akshareWeeklyK": {
-      "provider": "akshare.stock_zh_a_hist.weekly",
-      "status": "ready",
-      "docs": "https://akshare.akfamily.xyz/data/stock/stock.html",
-      "symbol": "600179",
-      "period": "weekly",
-      "count": 129,
-      "columns": [
-        "日期",
-        "股票代码",
-        "开盘",
-        "收盘",
-        "最高",
-        "最低",
-        "成交量",
-        "成交额",
-        "振幅",
-        "涨跌幅",
-        "涨跌额",
-        "换手率"
-      ],
-      "latest": {
-        "date": "2026-07-08",
-        "open": 4.63,
-        "close": 4.52,
-        "high": 4.84,
-        "low": 4.5,
-        "volume": 2166069.0,
-        "amount": 1010123768.0,
-        "pctChange": -1.53,
-        "turnoverRate": 5.61
-      }
+      "provider": "akshareWeeklyK",
+      "status": "failed",
+      "errorCode": "provider_error",
+      "error": "('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))"
+    },
+    "tushareStockBasic": {
+      "provider": "tushareStockBasic",
+      "status": "failed",
+      "errorCode": "provider_error",
+      "error": "抱歉，您没有接口(stock_basic)访问权限，权限的具体详情访问：https://tushare.pro/document/1?doc_id=108。"
     },
     "thsHot": {
       "provider": "thsHot",
@@ -124,13 +103,14 @@
     }
   },
   "blockingIssues": [
-    "mainBoardUniverse: AKShare spot did not prove enough rows for full A-share universe.",
+    "mainBoardUniverse: Neither AKShare spot nor Tushare stock_basic proved enough rows for full A-share universe.",
     "nonStFilter: ST/*ST/delisting are filtered by public name text only; announcement risk remains separate.",
     "pctChangeAndPrice: Price < 30 and pctChange 2%-5% are available from spot fields.",
     "thsPopularityTop200: Tushare ths_hot permission is required. Do not fake this field.",
     "peTtmNonLoss: No PE field detected.",
     "hardRiskFlags: Non-standard audit, investigation, major litigation, major reduction and performance blow-up need a real announcement/financial-report source. Do not default to safe.",
     "dailyK: Daily K supports MA, volume, candle, breakout, MACD and KDJ calculations.",
+    "weeklyK: Weekly K supports weekly moving-average bullish alignment.",
     "volumeBreakoutInputs: Daily high/low/open/close/volume can support previous-high, platform and red-candle checks.",
     "macdInputs: MACD can be computed from close series.",
     "kdjInputs: KDJ can be computed from high/low/close series."
