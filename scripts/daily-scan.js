@@ -144,18 +144,63 @@ const fetchStockBasic = () =>
     'ts_code,symbol,name,area,industry,market,list_date,list_status,exchange',
   );
 
-const fetchTradeDates = async () => {
+const fetchTradeDatesFromDailyFallback = async (warnings) => {
+  const endDate = new Date();
+  const maxCalendarDays = Math.max(LOOKBACK_OPEN_DAYS * 3, 220);
+  const openDates = [];
+
+  warnings.push(
+    'trade_cal is unavailable for this Tushare account; inferring trade dates from non-empty tushare.daily responses.',
+  );
+
+  for (let offset = 0; offset <= maxCalendarDays && openDates.length < LOOKBACK_OPEN_DAYS; offset += 1) {
+    const tradeDate = formatChinaDateCompact(addDays(endDate, -offset));
+    try {
+      const rows = await requestTushare('daily', { trade_date: tradeDate }, 'ts_code,trade_date');
+      if (rows.length > 0) {
+        openDates.push(tradeDate);
+      }
+    } catch (error) {
+      throw new ProviderError(
+        'provider_daily_calendar_fallback_failed',
+        `trade_cal unavailable and daily fallback failed: ${error.message || error}`,
+        { causeCode: error.code, causeDetails: error.details },
+      );
+    }
+
+    if (REQUEST_DELAY_MS > 0) await sleep(REQUEST_DELAY_MS);
+  }
+
+  if (openDates.length === 0) {
+    throw new ProviderError(
+      'provider_no_daily_calendar_fallback',
+      'trade_cal unavailable and tushare.daily returned no non-empty trade dates.',
+    );
+  }
+
+  return openDates.sort();
+};
+
+const fetchTradeDates = async (warnings = []) => {
   const endDate = new Date();
   const startDate = addDays(endDate, -260);
-  const rows = await requestTushare(
-    'trade_cal',
-    {
-      exchange: 'SSE',
-      start_date: formatChinaDateCompact(startDate),
-      end_date: formatChinaDateCompact(endDate),
-    },
-    'exchange,cal_date,is_open,pretrade_date',
-  );
+  let rows = [];
+  try {
+    rows = await requestTushare(
+      'trade_cal',
+      {
+        exchange: 'SSE',
+        start_date: formatChinaDateCompact(startDate),
+        end_date: formatChinaDateCompact(endDate),
+      },
+      'exchange,cal_date,is_open,pretrade_date',
+    );
+  } catch (error) {
+    if (error?.details?.apiName === 'trade_cal') {
+      return fetchTradeDatesFromDailyFallback(warnings);
+    }
+    throw error;
+  }
 
   const openDates = rows
     .filter((row) => Number(row.is_open) === 1)
@@ -763,7 +808,7 @@ const createFailedJson = (error) => {
 const runDailyScan = async () => {
   const createdAt = nowIso();
   const warnings = [RISK_WARNING];
-  const tradeDates = await fetchTradeDates();
+  const tradeDates = await fetchTradeDates(warnings);
   const latestTradeDate = tradeDates[tradeDates.length - 1];
   const tradeDate = dashTradeDate(latestTradeDate);
   const [stockRows, dailyRows] = await Promise.all([
