@@ -1,7 +1,7 @@
 {
   "source": "real",
   "product": "jubaopen-stock-picker",
-  "generatedAt": "2026-07-15T12:09:02.487507Z",
+  "generatedAt": "2026-07-17T11:59:36.500044Z",
   "readiness": {
     "allRequiredReady": false,
     "canStartMvpScanner": false,
@@ -105,15 +105,15 @@
         "换手率"
       ],
       "latest": {
-        "date": "2026-07-15",
+        "date": "2026-07-17",
         "open": 4.5,
-        "close": 4.35,
+        "close": 4.26,
         "high": 4.54,
         "low": 4.25,
-        "volume": 1157196.0,
-        "amount": 505959796.0,
-        "pctChange": -3.33,
-        "turnoverRate": 3.0
+        "volume": 1776798.0,
+        "amount": 774131144.0,
+        "pctChange": -5.33,
+        "turnoverRate": 4.6
       }
     },
     "tushareStockBasic": {
