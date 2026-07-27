@@ -1,7 +1,7 @@
 {
   "source": "real",
   "product": "jubaopen-stock-picker",
-  "generatedAt": "2026-07-22T13:09:14.262526Z",
+  "generatedAt": "2026-07-27T16:05:45.365323Z",
   "readiness": {
     "allRequiredReady": false,
     "canStartMvpScanner": false,
@@ -50,7 +50,7 @@
       "notes": "Daily K supports MA, volume, candle, breakout, MACD and KDJ calculations."
     },
     "weeklyK": {
-      "status": "blocked",
+      "status": "ready",
       "source": "akshare.stock_zh_a_hist.weekly",
       "notes": "Weekly K supports weekly moving-average bullish alignment."
     },
@@ -84,10 +84,37 @@
       "error": "('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))"
     },
     "akshareWeeklyK": {
-      "provider": "akshareWeeklyK",
-      "status": "failed",
-      "errorCode": "provider_error",
-      "error": "('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))"
+      "provider": "akshare.stock_zh_a_hist.weekly",
+      "status": "ready",
+      "docs": "https://akshare.akfamily.xyz/data/stock/stock.html",
+      "symbol": "600179",
+      "period": "weekly",
+      "count": 132,
+      "columns": [
+        "日期",
+        "股票代码",
+        "开盘",
+        "收盘",
+        "最高",
+        "最低",
+        "成交量",
+        "成交额",
+        "振幅",
+        "涨跌幅",
+        "涨跌额",
+        "换手率"
+      ],
+      "latest": {
+        "date": "2026-07-27",
+        "open": 4.14,
+        "close": 4.19,
+        "high": 4.21,
+        "low": 4.13,
+        "volume": 206867.0,
+        "amount": 86509564.0,
+        "pctChange": 1.21,
+        "turnoverRate": 0.54
+      }
     },
     "tushareStockBasic": {
       "provider": "tushareStockBasic",
@@ -110,7 +137,6 @@
     "peTtmNonLoss: No PE field detected.",
     "hardRiskFlags: Non-standard audit, investigation, major litigation, major reduction and performance blow-up need a real announcement/financial-report source. Do not default to safe.",
     "dailyK: Daily K supports MA, volume, candle, breakout, MACD and KDJ calculations.",
-    "weeklyK: Weekly K supports weekly moving-average bullish alignment.",
     "volumeBreakoutInputs: Daily high/low/open/close/volume can support previous-high, platform and red-candle checks.",
     "macdInputs: MACD can be computed from close series.",
     "kdjInputs: KDJ can be computed from high/low/close series."
