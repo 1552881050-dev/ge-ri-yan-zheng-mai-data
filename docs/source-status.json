@@ -1,7 +1,7 @@
 {
   "source": "real",
   "product": "jubaopen-stock-picker",
-  "generatedAt": "2026-08-07T10:34:00.607397Z",
+  "generatedAt": "2026-08-10T08:59:49.840132Z",
   "readiness": {
     "allRequiredReady": false,
     "canStartMvpScanner": false,
@@ -89,7 +89,7 @@
       "docs": "https://akshare.akfamily.xyz/data/stock/stock.html",
       "symbol": "600179",
       "period": "weekly",
-      "count": 133,
+      "count": 134,
       "columns": [
         "日期",
         "股票代码",
@@ -105,15 +105,15 @@
         "换手率"
       ],
       "latest": {
-        "date": "2026-08-07",
-        "open": 4.37,
+        "date": "2026-08-10",
+        "open": 4.25,
         "close": 4.24,
-        "high": 4.42,
+        "high": 4.28,
         "low": 4.22,
-        "volume": 1292641.0,
-        "amount": 560381162.0,
-        "pctChange": -2.97,
-        "turnoverRate": 3.35
+        "volume": 235262.0,
+        "amount": 100004914.0,
+        "pctChange": 0.0,
+        "turnoverRate": 0.61
       }
     },
     "tushareStockBasic": {
