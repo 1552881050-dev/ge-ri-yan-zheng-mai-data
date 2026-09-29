@@ -1,7 +1,7 @@
 {
   "source": "real",
   "product": "jubaopen-stock-picker",
-  "generatedAt": "2026-09-28T15:50:06.653963Z",
+  "generatedAt": "2026-09-29T14:17:44.125784Z",
   "readiness": {
     "allRequiredReady": false,
     "canStartMvpScanner": false,
@@ -50,7 +50,7 @@
       "notes": "Daily K supports MA, volume, candle, breakout, MACD and KDJ calculations."
     },
     "weeklyK": {
-      "status": "ready",
+      "status": "blocked",
       "source": "akshare.stock_zh_a_hist.weekly",
       "notes": "Weekly K supports weekly moving-average bullish alignment."
     },
@@ -83,7 +83,7 @@
       "docs": "https://akshare.akfamily.xyz/data/stock/stock.html",
       "symbol": "600179",
       "period": "daily",
-      "count": 654,
+      "count": 655,
       "columns": [
         "日期",
         "股票代码",
@@ -99,49 +99,22 @@
         "换手率"
       ],
       "latest": {
-        "date": "2026-09-28",
-        "open": 4.43,
-        "close": 4.39,
-        "high": 4.46,
-        "low": 4.37,
-        "volume": 211483.0,
-        "amount": 93012223.0,
-        "pctChange": -1.35,
-        "turnoverRate": 0.55
+        "date": "2026-09-29",
+        "open": 4.38,
+        "close": 4.35,
+        "high": 4.41,
+        "low": 4.33,
+        "volume": 189864.0,
+        "amount": 82671404.0,
+        "pctChange": -0.91,
+        "turnoverRate": 0.49
       }
     },
     "akshareWeeklyK": {
-      "provider": "akshare.stock_zh_a_hist.weekly",
-      "status": "ready",
-      "docs": "https://akshare.akfamily.xyz/data/stock/stock.html",
-      "symbol": "600179",
-      "period": "weekly",
-      "count": 141,
-      "columns": [
-        "日期",
-        "股票代码",
-        "开盘",
-        "收盘",
-        "最高",
-        "最低",
-        "成交量",
-        "成交额",
-        "振幅",
-        "涨跌幅",
-        "涨跌额",
-        "换手率"
-      ],
-      "latest": {
-        "date": "2026-09-28",
-        "open": 4.43,
-        "close": 4.39,
-        "high": 4.46,
-        "low": 4.37,
-        "volume": 211483.0,
-        "amount": 93012223.0,
-        "pctChange": -1.35,
-        "turnoverRate": 0.55
-      }
+      "provider": "akshareWeeklyK",
+      "status": "failed",
+      "errorCode": "provider_error",
+      "error": "('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))"
     },
     "tushareStockBasic": {
       "provider": "tushareStockBasic",
@@ -162,6 +135,7 @@
     "pctChangeAndPrice: Price < 30 and pctChange 2%-5% are available from spot fields.",
     "thsPopularityTop200: Tushare ths_hot permission is required. Do not fake this field.",
     "peTtmNonLoss: No PE field detected.",
-    "hardRiskFlags: Non-standard audit, investigation, major litigation, major reduction and performance blow-up need a real announcement/financial-report source. Do not default to safe."
+    "hardRiskFlags: Non-standard audit, investigation, major litigation, major reduction and performance blow-up need a real announcement/financial-report source. Do not default to safe.",
+    "weeklyK: Weekly K supports weekly moving-average bullish alignment."
   ]
 }
