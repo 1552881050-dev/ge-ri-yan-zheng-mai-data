@@ -1,7 +1,7 @@
 {
   "source": "real",
   "product": "jubaopen-stock-picker",
-  "generatedAt": "2026-10-29T14:37:31.009574Z",
+  "generatedAt": "2026-10-30T14:28:30.198871Z",
   "readiness": {
     "allRequiredReady": false,
     "canStartMvpScanner": false,
@@ -75,13 +75,13 @@
       "provider": "akshareSpot",
       "status": "failed",
       "errorCode": "provider_error",
-      "error": "('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))"
+      "error": "东方财富 push2 行情服务器断开了连接，通常是短时间内请求过多，当前 IP 被临时限流。首次限流一般约 5 分钟后恢复，反复触发后可能需要 40 分钟以上；等待期间不要重复调用东方财富的行情接口，否则会延长限流。"
     },
     "akshareDailyK": {
       "provider": "akshareDailyK",
       "status": "failed",
       "errorCode": "provider_error",
-      "error": "('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))"
+      "error": "东方财富 push2 行情服务器断开了连接，通常是短时间内请求过多，当前 IP 被临时限流。首次限流一般约 5 分钟后恢复，反复触发后可能需要 40 分钟以上；等待期间不要重复调用东方财富的行情接口，否则会延长限流。"
     },
     "akshareWeeklyK": {
       "provider": "akshare.stock_zh_a_hist.weekly",
@@ -105,15 +105,15 @@
         "换手率"
       ],
       "latest": {
-        "date": "2026-10-29",
+        "date": "2026-10-30",
         "open": 3.95,
-        "close": 3.89,
+        "close": 3.81,
         "high": 4.05,
-        "low": 3.86,
-        "volume": 930234.0,
-        "amount": 366615589.0,
-        "pctChange": -1.52,
-        "turnoverRate": 2.41
+        "low": 3.8,
+        "volume": 1203934.0,
+        "amount": 472211031.0,
+        "pctChange": -3.54,
+        "turnoverRate": 3.12
       }
     },
     "tushareStockBasic": {
