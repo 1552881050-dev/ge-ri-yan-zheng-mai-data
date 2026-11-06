@@ -1,7 +1,7 @@
 {
   "source": "real",
   "product": "jubaopen-stock-picker",
-  "generatedAt": "2026-11-05T15:48:26.151423Z",
+  "generatedAt": "2026-11-06T15:22:35.813596Z",
   "readiness": {
     "allRequiredReady": false,
     "canStartMvpScanner": true,
@@ -103,7 +103,7 @@
       ],
       "mainBoardCount": 3446,
       "ordinaryMainBoardCount": 3075,
-      "pricePctCount": 949,
+      "pricePctCount": 69,
       "fields": {
         "code": "代码",
         "name": "名称",
@@ -116,53 +116,53 @@
       },
       "sampleRows": [
         {
-          "code": "920007",
-          "name": "酉立智能",
-          "price": 39.49,
-          "pctChange": 29.99,
-          "turnoverRate": 19.66,
-          "amount": 101527842.51,
-          "peDynamic": 71.19,
+          "code": "920085",
+          "name": "N森峰",
+          "price": 39.25,
+          "pctChange": 120.63,
+          "turnoverRate": 93.89,
+          "amount": 800999637.78,
+          "peDynamic": 20.41,
           "peTtm": null
         },
         {
-          "code": "300071",
-          "name": "福石控股",
-          "price": 4.55,
-          "pctChange": 20.05,
-          "turnoverRate": 29.08,
-          "amount": 1220204361.02,
-          "peDynamic": -173.34,
+          "code": "301697",
+          "name": "贝特利",
+          "price": 36.6,
+          "pctChange": 20.0,
+          "turnoverRate": 40.68,
+          "amount": 631178254.66,
+          "peDynamic": 66.58,
           "peTtm": null
         },
         {
-          "code": "300709",
-          "name": "精研科技",
-          "price": 41.38,
-          "pctChange": 20.01,
-          "turnoverRate": 18.65,
-          "amount": 1105095401.56,
-          "peDynamic": 42.72,
+          "code": "300237",
+          "name": "美晨科技",
+          "price": 2.82,
+          "pctChange": 20.0,
+          "turnoverRate": 10.91,
+          "amount": 426249791.58,
+          "peDynamic": -95.17,
           "peTtm": null
         },
         {
-          "code": "688316",
-          "name": "青云科技-U",
-          "price": 48.1,
-          "pctChange": 20.01,
-          "turnoverRate": 12.9,
-          "amount": 274591425.0,
-          "peDynamic": -39.23,
+          "code": "300686",
+          "name": "智动力",
+          "price": 13.68,
+          "pctChange": 20.0,
+          "turnoverRate": 8.95,
+          "amount": 295706929.09,
+          "peDynamic": -50.61,
           "peTtm": null
         },
         {
-          "code": "301209",
-          "name": "联合化学",
-          "price": 39.95,
-          "pctChange": 20.01,
-          "turnoverRate": 7.24,
-          "amount": 344356145.93,
-          "peDynamic": 6900.75,
+          "code": "920175",
+          "name": "东方碳素",
+          "price": 8.45,
+          "pctChange": 18.85,
+          "turnoverRate": 22.19,
+          "amount": 152063805.6,
+          "peDynamic": -13.75,
           "peTtm": null
         }
       ]
@@ -173,7 +173,7 @@
       "docs": "https://akshare.akfamily.xyz/data/stock/stock.html",
       "symbol": "600179",
       "period": "daily",
-      "count": 677,
+      "count": 678,
       "columns": [
         "日期",
         "股票代码",
@@ -189,15 +189,15 @@
         "换手率"
       ],
       "latest": {
-        "date": "2026-11-05",
-        "open": 3.94,
-        "close": 3.94,
-        "high": 3.98,
-        "low": 3.92,
-        "volume": 243005.0,
-        "amount": 95693304.0,
-        "pctChange": -0.51,
-        "turnoverRate": 0.63
+        "date": "2026-11-06",
+        "open": 3.89,
+        "close": 3.93,
+        "high": 3.95,
+        "low": 3.85,
+        "volume": 234882.0,
+        "amount": 91688956.0,
+        "pctChange": -0.25,
+        "turnoverRate": 0.61
       }
     },
     "akshareWeeklyK": {
@@ -222,15 +222,15 @@
         "换手率"
       ],
       "latest": {
-        "date": "2026-11-05",
+        "date": "2026-11-06",
         "open": 3.8,
-        "close": 3.94,
+        "close": 3.93,
         "high": 3.98,
         "low": 3.79,
-        "volume": 1082924.0,
-        "amount": 424202072.0,
-        "pctChange": 3.41,
-        "turnoverRate": 2.8
+        "volume": 1317806.0,
+        "amount": 515891028.0,
+        "pctChange": 3.15,
+        "turnoverRate": 3.41
       }
     },
     "tushareStockBasic": {
