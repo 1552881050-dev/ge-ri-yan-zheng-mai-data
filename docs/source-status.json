@@ -1,7 +1,7 @@
 {
   "source": "real",
   "product": "jubaopen-stock-picker",
-  "generatedAt": "2026-11-09T17:48:32.038368Z",
+  "generatedAt": "2026-11-10T15:47:33.553957Z",
   "readiness": {
     "allRequiredReady": false,
     "canStartMvpScanner": true,
@@ -75,7 +75,7 @@
       "provider": "akshare.stock_zh_a_spot_em",
       "status": "ready",
       "docs": "https://akshare.akfamily.xyz/data/stock/stock.html",
-      "totalRows": 5927,
+      "totalRows": 5928,
       "columns": [
         "序号",
         "代码",
@@ -103,7 +103,7 @@
       ],
       "mainBoardCount": 3446,
       "ordinaryMainBoardCount": 3075,
-      "pricePctCount": 210,
+      "pricePctCount": 581,
       "fields": {
         "code": "代码",
         "name": "名称",
@@ -116,53 +116,53 @@
       },
       "sampleRows": [
         {
-          "code": "301010",
-          "name": "晶雪节能",
-          "price": 26.21,
+          "code": "688827",
+          "name": "N钶锐",
+          "price": 129.2,
+          "pctChange": 184.77,
+          "turnoverRate": 81.67,
+          "amount": 1610288124.0,
+          "peDynamic": 88.89,
+          "peTtm": null
+        },
+        {
+          "code": "300264",
+          "name": "佳创视讯",
+          "price": 6.58,
+          "pctChange": 20.07,
+          "turnoverRate": 11.57,
+          "amount": 265554870.86,
+          "peDynamic": -159.33,
+          "peTtm": null
+        },
+        {
+          "code": "300556",
+          "name": "丝路视觉",
+          "price": 22.25,
           "pctChange": 20.01,
-          "turnoverRate": 20.91,
-          "amount": 547383053.02,
-          "peDynamic": 307.09,
+          "turnoverRate": 36.61,
+          "amount": 817085177.5,
+          "peDynamic": 208.29,
           "peTtm": null
         },
         {
-          "code": "688585",
-          "name": "上纬新材",
-          "price": 216.02,
-          "pctChange": 20.0,
-          "turnoverRate": 3.92,
-          "amount": 3325077078.0,
-          "peDynamic": -154.87,
+          "code": "688611",
+          "name": "杭州柯林",
+          "price": 79.06,
+          "pctChange": 20.01,
+          "turnoverRate": 3.81,
+          "amount": 438836062.0,
+          "peDynamic": -217.96,
           "peTtm": null
         },
         {
-          "code": "301226",
-          "name": "祥明智能",
-          "price": 33.06,
-          "pctChange": 20.0,
-          "turnoverRate": 3.52,
-          "amount": 121383267.12,
-          "peDynamic": 248.19,
-          "peTtm": null
-        },
-        {
-          "code": "301718",
-          "name": "通则康威",
-          "price": 57.48,
-          "pctChange": 20.0,
-          "turnoverRate": 46.49,
-          "amount": 877953201.99,
-          "peDynamic": 53.1,
-          "peTtm": null
-        },
-        {
-          "code": "688801",
-          "name": "燧原科技-U",
-          "price": 432.8,
-          "pctChange": 17.26,
-          "turnoverRate": 17.21,
-          "amount": 1255050223.0,
-          "peDynamic": -185.27,
+          "code": "300613",
+          "name": "富瀚微",
+          "price": 80.02,
+          "pctChange": 20.01,
+          "turnoverRate": 13.61,
+          "amount": 2217242355.59,
+          "peDynamic": 18.04,
           "peTtm": null
         }
       ]
@@ -173,7 +173,7 @@
       "docs": "https://akshare.akfamily.xyz/data/stock/stock.html",
       "symbol": "600179",
       "period": "daily",
-      "count": 679,
+      "count": 680,
       "columns": [
         "日期",
         "股票代码",
@@ -189,15 +189,15 @@
         "换手率"
       ],
       "latest": {
-        "date": "2026-11-09",
-        "open": 3.94,
-        "close": 3.95,
-        "high": 3.99,
+        "date": "2026-11-10",
+        "open": 3.96,
+        "close": 3.93,
+        "high": 3.98,
         "low": 3.93,
-        "volume": 220258.0,
-        "amount": 87319135.0,
-        "pctChange": 0.51,
-        "turnoverRate": 0.57
+        "volume": 158558.0,
+        "amount": 62671237.0,
+        "pctChange": -0.51,
+        "turnoverRate": 0.41
       }
     },
     "akshareWeeklyK": {
@@ -222,15 +222,15 @@
         "换手率"
       ],
       "latest": {
-        "date": "2026-11-09",
+        "date": "2026-11-10",
         "open": 3.94,
-        "close": 3.95,
+        "close": 3.93,
         "high": 3.99,
         "low": 3.93,
-        "volume": 220258.0,
-        "amount": 87319135.0,
-        "pctChange": 0.51,
-        "turnoverRate": 0.57
+        "volume": 378816.0,
+        "amount": 149990372.0,
+        "pctChange": 0.0,
+        "turnoverRate": 0.98
       }
     },
     "tushareStockBasic": {
