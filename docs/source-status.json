@@ -1,7 +1,7 @@
 {
   "source": "real",
   "product": "jubaopen-stock-picker",
-  "generatedAt": "2026-11-11T15:33:21.278361Z",
+  "generatedAt": "2026-11-12T16:09:17.234246Z",
   "readiness": {
     "allRequiredReady": false,
     "canStartMvpScanner": false,
@@ -83,7 +83,7 @@
       "docs": "https://akshare.akfamily.xyz/data/stock/stock.html",
       "symbol": "600179",
       "period": "daily",
-      "count": 681,
+      "count": 682,
       "columns": [
         "日期",
         "股票代码",
@@ -99,15 +99,15 @@
         "换手率"
       ],
       "latest": {
-        "date": "2026-11-11",
-        "open": 3.93,
-        "close": 3.92,
-        "high": 3.95,
-        "low": 3.9,
-        "volume": 145906.0,
-        "amount": 57222146.0,
-        "pctChange": -0.25,
-        "turnoverRate": 0.38
+        "date": "2026-11-12",
+        "open": 3.92,
+        "close": 3.85,
+        "high": 3.94,
+        "low": 3.85,
+        "volume": 219997.0,
+        "amount": 85401201.0,
+        "pctChange": -1.79,
+        "turnoverRate": 0.57
       }
     },
     "akshareWeeklyK": {
@@ -132,15 +132,15 @@
         "换手率"
       ],
       "latest": {
-        "date": "2026-11-11",
+        "date": "2026-11-12",
         "open": 3.94,
-        "close": 3.92,
+        "close": 3.85,
         "high": 3.99,
-        "low": 3.9,
-        "volume": 524722.0,
-        "amount": 207212518.0,
-        "pctChange": -0.25,
-        "turnoverRate": 1.36
+        "low": 3.85,
+        "volume": 744719.0,
+        "amount": 292613719.0,
+        "pctChange": -2.04,
+        "turnoverRate": 1.93
       }
     },
     "tushareStockBasic": {
