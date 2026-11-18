@@ -1,7 +1,7 @@
 {
   "source": "real",
   "product": "jubaopen-stock-picker",
-  "generatedAt": "2026-11-17T17:04:45.483812Z",
+  "generatedAt": "2026-11-18T16:41:21.181215Z",
   "readiness": {
     "allRequiredReady": false,
     "canStartMvpScanner": false,
@@ -15,17 +15,17 @@
   },
   "required": {
     "mainBoardUniverse": {
-      "status": "ready",
+      "status": "blocked",
       "source": "akshare.stock_zh_a_spot_em / tushare.stock_basic",
-      "notes": "A-share universe source is ready."
+      "notes": "Neither AKShare spot nor Tushare stock_basic proved enough rows for full A-share universe."
     },
     "nonStFilter": {
-      "status": "partial",
+      "status": "blocked",
       "source": "akshare.stock_zh_a_spot_em.name / tushare.stock_basic.name",
       "notes": "ST/*ST/delisting are filtered by public name text only; announcement risk remains separate."
     },
     "pctChangeAndPrice": {
-      "status": "ready",
+      "status": "blocked",
       "source": "akshare.stock_zh_a_spot_em",
       "notes": "Price < 30 and pctChange 2%-5% are available from spot fields."
     },
@@ -35,9 +35,9 @@
       "notes": "Tushare ths_hot permission is required. Do not fake this field."
     },
     "peTtmNonLoss": {
-      "status": "partial",
+      "status": "blocked",
       "source": "akshare.stock_zh_a_spot_em",
-      "notes": "Only dynamic PE is available from spot; this cannot be treated as PE TTM."
+      "notes": "No PE field detected."
     },
     "hardRiskFlags": {
       "status": "blocked",
@@ -72,100 +72,10 @@
   },
   "providers": {
     "akshareSpot": {
-      "provider": "akshare.stock_zh_a_spot_em",
-      "status": "ready",
-      "docs": "https://akshare.akfamily.xyz/data/stock/stock.html",
-      "totalRows": 5930,
-      "columns": [
-        "序号",
-        "代码",
-        "名称",
-        "最新价",
-        "涨跌幅",
-        "涨跌额",
-        "成交量",
-        "成交额",
-        "振幅",
-        "最高",
-        "最低",
-        "今开",
-        "昨收",
-        "量比",
-        "换手率",
-        "市盈率-动态",
-        "市净率",
-        "总市值",
-        "流通市值",
-        "涨速",
-        "5分钟涨跌",
-        "60日涨跌幅",
-        "年初至今涨跌幅"
-      ],
-      "mainBoardCount": 3446,
-      "ordinaryMainBoardCount": 3075,
-      "pricePctCount": 123,
-      "fields": {
-        "code": "代码",
-        "name": "名称",
-        "price": "最新价",
-        "pctChange": "涨跌幅",
-        "turnoverRate": "换手率",
-        "amount": "成交额",
-        "peDynamic": "市盈率-动态",
-        "peTtm": null
-      },
-      "sampleRows": [
-        {
-          "code": "920309",
-          "name": "N菊乐",
-          "price": 56.78,
-          "pctChange": 77.88,
-          "turnoverRate": 97.51,
-          "amount": 526926649.33,
-          "peDynamic": 15.78,
-          "peTtm": null
-        },
-        {
-          "code": "920489",
-          "name": "佳先股份",
-          "price": 12.54,
-          "pctChange": 29.95,
-          "turnoverRate": 20.34,
-          "amount": 209135602.56,
-          "peDynamic": -138.8,
-          "peTtm": null
-        },
-        {
-          "code": "301288",
-          "name": "清研环境",
-          "price": 20.14,
-          "pctChange": 20.02,
-          "turnoverRate": 15.07,
-          "amount": 227666262.28,
-          "peDynamic": -43.79,
-          "peTtm": null
-        },
-        {
-          "code": "301209",
-          "name": "联合化学",
-          "price": 52.96,
-          "pctChange": 20.01,
-          "turnoverRate": 9.34,
-          "amount": 633270266.56,
-          "peDynamic": 9148.03,
-          "peTtm": null
-        },
-        {
-          "code": "301391",
-          "name": "卡莱特",
-          "price": 38.88,
-          "pctChange": 20.0,
-          "turnoverRate": 5.45,
-          "amount": 180739934.14,
-          "peDynamic": 2250.55,
-          "peTtm": null
-        }
-      ]
+      "provider": "akshareSpot",
+      "status": "failed",
+      "errorCode": "provider_error",
+      "error": "东方财富 push2 行情服务器断开了连接，通常是短时间内请求过多，当前 IP 被临时限流。首次限流一般约 5 分钟后恢复，反复触发后可能需要 40 分钟以上；等待期间不要重复调用东方财富的行情接口，否则会延长限流。"
     },
     "akshareDailyK": {
       "provider": "akshareDailyK",
@@ -193,7 +103,11 @@
     }
   },
   "blockingIssues": [
+    "mainBoardUniverse: Neither AKShare spot nor Tushare stock_basic proved enough rows for full A-share universe.",
+    "nonStFilter: ST/*ST/delisting are filtered by public name text only; announcement risk remains separate.",
+    "pctChangeAndPrice: Price < 30 and pctChange 2%-5% are available from spot fields.",
     "thsPopularityTop200: Tushare ths_hot permission is required. Do not fake this field.",
+    "peTtmNonLoss: No PE field detected.",
     "hardRiskFlags: Non-standard audit, investigation, major litigation, major reduction and performance blow-up need a real announcement/financial-report source. Do not default to safe.",
     "dailyK: Daily K supports MA, volume, candle, breakout, MACD and KDJ calculations.",
     "weeklyK: Weekly K supports weekly moving-average bullish alignment.",
