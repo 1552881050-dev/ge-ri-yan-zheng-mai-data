@@ -1,7 +1,7 @@
 {
   "source": "real",
   "product": "jubaopen-stock-picker",
-  "generatedAt": "2026-11-20T16:19:23.168687Z",
+  "generatedAt": "2026-11-23T19:26:32.413616Z",
   "readiness": {
     "allRequiredReady": false,
     "canStartMvpScanner": false,
